@@ -12,7 +12,7 @@
       "source": {
         "source": "github",
         "repo": "Oscabrera/review-strict",
-        "ref": "master"
+        "ref": "main"
       },
       "category": "development",
       "tags": ["pr-review", "code-review", "quality", "reviewer"]

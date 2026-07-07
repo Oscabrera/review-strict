@@ -58,20 +58,19 @@ mitigation absent from the diff is flagged `claimed-but-not-done`.
 
 ## Publishing
 
-The manifests are already filled for `Oscabrera`. The repo follows **gitflow**:
-`master` is the stable branch the marketplace installs from (`ref: master`), and
-`develop` is the integration branch for ongoing work.
+Branching: **`main`** is the stable/default branch the marketplace installs from
+(`ref: main`); **`develop`** is the integration branch for ongoing work.
 
 ```
 git init && git add -A && git commit -m "feat: review-strict plugin v1.0.0"
-git branch -M master
+git branch -M main
 git branch develop
-gh repo create Oscabrera/review-strict --public --source=. --remote=origin --push
+gh repo create Oscabrera/review-strict --private --source=. --remote=origin --push
 git push -u origin develop
 ```
 
-Day-to-day: land changes on `develop`; merge to `master` to cut a release
-(bump `CHANGELOG.md`). Consumers on the marketplace always get `master`.
+Day-to-day: land changes on `develop`; merge to `main` to cut a release
+(bump `CHANGELOG.md`). Consumers on the marketplace always get `main`.
 
 ## License
 
