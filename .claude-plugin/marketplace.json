@@ -1,0 +1,21 @@
+{
+  "name": "review-strict",
+  "owner": {
+    "name": "Oscar Cabrera",
+    "url": "https://github.com/Oscabrera"
+  },
+  "description": "Personal marketplace hosting the review-strict plugin.",
+  "plugins": [
+    {
+      "name": "review-strict",
+      "description": "Strict, repo-adaptive, multi-agent PR/branch/diff reviewer.",
+      "source": {
+        "source": "github",
+        "repo": "Oscabrera/review-strict",
+        "ref": "master"
+      },
+      "category": "development",
+      "tags": ["pr-review", "code-review", "quality", "reviewer"]
+    }
+  ]
+}

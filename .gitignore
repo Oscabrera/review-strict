@@ -1,0 +1,3 @@
+# review-strict writes reports to a `reviews/` folder INSIDE each reviewed repo,
+# not here. Nothing runtime-generated lives in this plugin repo.
+.DS_Store
