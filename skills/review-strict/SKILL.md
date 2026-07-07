@@ -29,7 +29,12 @@ Flags:
 - `--fast` — single-agent sequential mode instead of multi-agent fan-out (cheaper, less rigorous). Default is multi-agent.
 - `--lang <en|es>` — force the report language for this run (overrides the `REVIEW_STRICT_LANG` env var). Default is **English**; set `REVIEW_STRICT_LANG=es` to make Spanish your standing default.
 
-Announce the resolved mode in one line before starting (e.g. "Reviewing PR #241 on cp-shops-catalog vs `development`, multi-agent + verify, archiving to brain/review-strict/cp-shops-catalog/241.md").
+**First, resolve the effective config from the environment** — read the two override vars once so archive path and language are correct:
+```bash
+printf 'archive_dir=%s lang=%s\n' \
+  "${REVIEW_STRICT_ARCHIVE_DIR:-<in-repo reviews/>}" "${REVIEW_STRICT_LANG:-en}"
+```
+The `--lang <en|es>` flag overrides `REVIEW_STRICT_LANG`; the resolved values drive Phase 5 (archive) and the report language. Then announce the resolved mode in one line, **including the resolved archive location and language** (e.g. "Reviewing PR #241 on cp-shops-catalog vs `development`, multi-agent + verify, en, archiving to `<repo>/reviews/…`").
 
 ## Phase 0 — Build the Repo Review Profile (the adaptive core)
 
