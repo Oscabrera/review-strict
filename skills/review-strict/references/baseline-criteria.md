@@ -8,7 +8,7 @@ This is the independent standard `/review-strict` applies **on top of** whatever
 
 2. **Architecture & reuse.** Respect the project's layering and conventions; reuse existing code before adding new; no logic dumped into one monolithic file or method.
 
-3. **Defensive programming.** Validate inputs; handle null/empty/boundary cases; fail safe; never assume the happy path or trust callers.
+3. **Defensive programming.** Validate inputs; handle null/empty/boundary cases; fail safe; never assume the happy path or trust callers. Fail-safe includes **config/env boolean coercion**: a flag or kill-switch read from `env()` and consumed by truthiness fails OPEN for any off-synonym `env()` does not map (`off`/`no`/`disabled` stay truthy strings and *arm* the guarded behavior) — require `filter_var(FILTER_VALIDATE_BOOLEAN)` (or an explicit cast) at the boundary, and expect tests to cover the off-synonyms, not just `false`/`null`. (Security lens owns the deep check.)
 
 4. **Performance hygiene.** No read or write N+1; no unbounded materialization of a table into memory (prefer anti-joins + bounded `whereIn` over chunks); bounded worker memory; real indexes on the columns actually filtered.
 
