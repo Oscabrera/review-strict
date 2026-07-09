@@ -2,6 +2,8 @@
 
 Revisor de PR/branch/diff **estricto y adaptativo al repo**. Skill de Claude Code: se adapta al repo donde lo corras (lee sus reglas reales) y produce un review riguroso, multi-agente y verificado adversarialmente.
 
+Parte de la familia de análisis: **`/spec-strict`** (el plan) → **`/review-strict`** (el cambio) → **`/audit-strict`** (el repo).
+
 ## Qué hace
 
 Revisa un diff con rigor de staff engineer y **solo reporta errores** (nada de "looks good"), con evidencia `file:línea` y decisión final `approve` / `request-changes` / `comment`.

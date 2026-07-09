@@ -8,6 +8,8 @@ cite-accurate analysis and a prioritized, phased roadmap the team can act on.
 It ships in the same plugin and reuses review-strict's spine: the repo profile,
 the adversarial `verify-skeptic` pass, the severity crosswalk, and the staff baseline.
 
+Part of the analysis family: **`/spec-strict`** (the plan) → **`/review-strict`** (the change) → **`/audit-strict`** (the repo).
+
 ## What it produces
 
 A self-contained deliverable in `audit-strict/` (in-repo by default; `<base>/audit-strict/<repo>/` when a base is configured):
