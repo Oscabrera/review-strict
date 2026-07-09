@@ -1,6 +1,6 @@
 {
   "name": "review-strict",
-  "description": "Strict, repo-adaptive PR / branch / diff reviewer — multi-agent, adversarially-verified code review at staff-engineer rigor (correctness, security, architecture, tests, migration safety). Adapts to each repo's own rules (AGENTS.md, CLAUDE.md, .claude/skills). Archives a project-named report inside the repo by default; English by default, both configurable via env vars. Independent of any spec pipeline.",
+  "description": "Two repo-adaptive, adversarially-verified analysis skills at staff-engineer rigor. /review-strict: multi-agent PR/branch/diff review (correctness, security, architecture, tests, migration safety). /audit-strict: deep whole-repo architecture audit — component map, flows, lifecycle, data model, quality audit and a prioritized roadmap written to .ai-abstracts/audit/. Both adapt to each repo's own rules (AGENTS.md, CLAUDE.md, .claude/skills) and share a verify-skeptic pass; English by default, configurable via env vars. Independent of any spec pipeline.",
   "owner": {
     "name": "Oscar Cabrera",
     "url": "https://github.com/Oscabrera"
@@ -8,5 +8,5 @@
   "homepage": "https://github.com/Oscabrera/review-strict",
   "license": "MIT",
   "category": "workflow",
-  "keywords": ["pr-review", "code-review", "quality", "reviewer", "static-analysis"]
+  "keywords": ["pr-review", "code-review", "quality", "reviewer", "static-analysis", "audit", "architecture", "repo-analysis"]
 }
