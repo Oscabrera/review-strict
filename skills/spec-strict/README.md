@@ -1,3 +1,5 @@
+> 🌐 **English** · [Español](README.es.md)
+
 # spec-strict
 
 A **strict, repo-adaptive review of a Stratos/Axiom spec — before any code is written.**

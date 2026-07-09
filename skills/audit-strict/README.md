@@ -1,3 +1,5 @@
+> 🌐 **English** · [Español](README.es.md)
+
 # audit-strict
 
 A **deep, repo-adaptive whole-repository architecture audit** for Claude Code — the
