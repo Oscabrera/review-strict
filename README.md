@@ -6,9 +6,13 @@ multi-agent, adversarially-verified code review at staff-engineer rigor
 repository's own rules, and archives a project-named report. It is independent of
 any spec/CI pipeline — point it at a PR, a branch, or a diff.
 
-The plugin ships **two sibling skills**: **`/review-strict`** (diff/PR review, above) and
-**`/audit-strict`** (deep whole-repo architecture audit — component map, flows, lifecycle,
-data model, quality audit + prioritized roadmap; see `skills/audit-strict/README.md`).
+The plugin ships **three sibling skills** — the analysis family, in workflow order:
+
+- **`/spec-strict`** — pre-code review of a Stratos/Axiom spec dir (`spec.md`/`plan.json`/`pr.md`/`validation.md`), **before** Forge writes code; hunts omissions (uncovered entry-points, non-diff-checkable ACs, wrong-stack verification commands, incomplete risk inventory, layering misfit, unstable scope). See `skills/spec-strict/README.md`.
+- **`/review-strict`** — the diff/PR review above (correctness, security, architecture + SOLID + complexity, tests, migration safety).
+- **`/audit-strict`** — deep whole-repo architecture audit (component map, flows, lifecycle, data model, quality audit + prioritized roadmap). See `skills/audit-strict/README.md`.
+
+Together: **`/spec-strict` reviews the plan → `/review-strict` reviews the change → `/audit-strict` reviews the repo.**
 
 ## Install
 
@@ -19,7 +23,7 @@ This is a **public, self-contained** repo (it is both the plugin and its own mar
 /plugin install review-strict
 ```
 
-Then invoke `/review-strict` or `/audit-strict` in any repo.
+Then invoke `/spec-strict`, `/review-strict` or `/audit-strict` in any repo.
 
 ## Updating
 
@@ -48,6 +52,16 @@ Releases are **version-gated**: consumers only move when the `version` in
 `main` is what cuts a release.
 
 ## Usage
+
+```
+/spec-strict                    # review the spec dir on the current branch (pre-code)
+/spec-strict IT-52986           # resolve specs/IT-52986-*/ on this branch
+/spec-strict specs/IT-123-x/    # explicit spec dir
+/spec-strict --fast             # single-agent mode (cheaper, less rigorous)
+/spec-strict --lang es          # review in Spanish
+```
+
+See `skills/spec-strict/README.md` for the full `/spec-strict` reference.
 
 ```
 /review-strict                 # review the current branch vs its base (pre-PR)
