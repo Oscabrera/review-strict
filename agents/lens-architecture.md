@@ -39,3 +39,27 @@ The oracle for all of the below is **how THIS repo already builds things** (its 
 - **Design-pattern conformance — to the repo's patterns, not ideals.** If the repo has an established pattern (Service/Repository/DTO/Action/Factory/Strategy/Observer/event bus…), a change that **bypasses or re-implements it ad-hoc** is the finding — name the pattern and the sanctioned place. **Do NOT recommend introducing a pattern the repo does not use** ("add a Factory here") unless it removes a concrete, named defect. Architecture-astronaut suggestions are noise and are out of scope.
 
 **Guardrail (keeps this strict, not noisy):** every architecture finding cites `file:line` + the concrete symptom (the responsibility conflated / the existing pattern bypassed / the contract broken). "Feels un-SOLID", "could be cleaner", naming/formatting are **not** findings. The repo's conventions and its declared thresholds win; the baseline applies only where the repo is silent.
+
+## Complexity & size budgets (concrete metrics, inspired by PHPMD + PHP Insights)
+
+Concrete numbers beat "this is complex". **Thresholds come from the repo first, defaults second:**
+1. **Repo config wins** — if the repo configures limits (`phpmd.xml`/`phpmd.xml.dist`, `phpinsights.php`, a PHPStan cognitive/cyclomatic rule, or numbers stated in `AGENTS.md`/`CLAUDE.md`), cite the **repo's** number, not the default.
+2. **Read CI evidence** — if the repo runs PHPMD/PHP Insights/PHPStan in CI, summarize that output (like Pint/PHPStan in Phase 1); do not recompute metrics by hand.
+3. **Baseline defaults** (below) apply only where the repo is silent.
+
+Flag a finding when the **diff introduces or worsens** a method/class past a threshold — this is a diff review, not a full-repo scan (that's PHPMD's / `/audit-strict`'s job). Severity **P2** (refactor candidate) unless the complexity hides a correctness/security risk → escalate.
+
+| Metric | Baseline default | Source / note |
+|---|---|---|
+| Cyclomatic complexity / method | ≥ 10 | PHPMD `reportLevel`. PHP Insights is stricter (5, per class). Cyberpuerta's own bar is CC > 10. |
+| NPath complexity / method | ≥ 200 | PHPMD — execution-path explosion |
+| Method length | > 100 lines | PHPMD. Cyberpuerta: > 50 |
+| Class length | > 1000 lines | PHPMD. Cyberpuerta: > 300 |
+| Parameter list | ≥ 10 params | PHPMD. Cyberpuerta: > 5 |
+| Public methods / class | ≥ 10 | PHPMD `TooManyPublicMethods`. Cyberpuerta: > 20 |
+| Methods / class | ≥ 25 | PHPMD `TooManyMethods` |
+| Fields / class | ≥ 15 | PHPMD `TooManyFields` |
+| Weighted class complexity (Σ method CC) | ≥ 50 | PHPMD `ExcessiveClassComplexity` — the God-class signal |
+| Coupling between objects (CBO) | ≥ 13 | PHPMD Design ruleset |
+
+The **God-class / "todo en un archivo"** case usually trips *several* of these at once (high WMC + many methods + long class + high coupling) — name which metrics it breaks so the fix is obvious. Cyclomatic complexity is the headline metric to watch, but report it with the concrete number (measured or from CI evidence), never as a vague "too complex".
