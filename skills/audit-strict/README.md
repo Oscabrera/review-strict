@@ -16,7 +16,7 @@ A self-contained deliverable in `audit-strict/` (in-repo by default; `<base>/aud
 
 | File | Content |
 |---|---|
-| `README.md` | Exec summary, top-10 risks, 10 key recommendations, index, limitations |
+| `README.md` | Exec summary, **per-dimension scorecard (1–5)**, findings grouped by dimension, coverage map, index, limitations |
 | `componentes.md` | Component map, dependencies, coupling, SPOFs, hot paths |
 | `flujos.md` | Principal end-to-end flows + Mermaid `sequenceDiagram` |
 | `ciclo-vida.md` | Entity states/transitions + Mermaid `stateDiagram-v2` |
@@ -46,7 +46,7 @@ A self-contained deliverable in `audit-strict/` (in-repo by default; `<base>/aud
 2. **Ground it** — graphify-first (if `graphify-out/` exists), else a deterministic `rg`/glob inventory. Cartographers cite only from this verified set.
 3. **Five cartographers in parallel** — components, flows, lifecycle, data model, quality audit. One per deliverable → even depth. Backend and Vue/Nuxt variants, auto-selected. Run on **sonnet by default** (cheaper readers; `--model` to change).
 4. **Adversarial verification** (reused `verify-skeptic`, on the session model) — refutes every citation and claim against the real code and the repo profile. Impossible ranges, unresolved paths, and "X is missing" claims that contradict the repo are dropped.
-5. **Synthesize** — the nine files + a prioritized roadmap; every item traces to a surviving finding; zero placeholders.
+5. **Synthesize** — the ten files + a prioritized roadmap; every item traces to a surviving finding; zero placeholders.
 6. **Deliver** — writes the `audit-strict/` deliverable (heredoc, literal Mermaid/code), prints the summary.
 
 ## Why it's stricter than a single-pass analysis

@@ -57,7 +57,7 @@ Pass this into each Phase-2 dispatch:
 - `stack` = `backend | vue-nuxt | both`
 - `inventory` = the categorized file list above (paths + roles; ranges where known)
 - `repo_profile` slice = layering, red lines, declared observability/telemetry, in-progress migrations, testing conventions, base branch (from Phase 0 — **ground truth**)
-- `graphify_available` = true/false (so a cartographer knows whether it can `graphify explain` for more)
+- `graphify_available` = true/false — informational only. **Cartographers have `Read`/`Grep`/`Glob` only (no Bash), so they cannot run the graphify CLI themselves.** All graphify querying happens here in Phase 1 (the orchestrator has Bash); cartographers cite from the inventory this phase produced.
 
 ## Rules
 

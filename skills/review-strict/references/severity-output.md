@@ -12,6 +12,16 @@ Reason internally in P0/P1/P2; report in the **repo's vocabulary** (from the pro
 
 If the repo defines different words or levels, map onto them and keep the "blocks merge" column semantics.
 
+**Spec-review vocabulary (`/spec-strict`).** A spec review reports readiness, not merge-blocking, so it uses its own words that map 1:1 onto the internal levels:
+
+| Internal | Spec term | Meaning |
+|---|---|---|
+| **P0** | **block** | Omission that will cause a runtime fatal / re-open / wrong-stack command / unauthorized red-line — fix the spec before Forge. |
+| **P1** | **should-fix** | Will cost a fix commit or a reviewer round-trip. |
+| **P2** | **nice-to-have** | Clarity / robustness. |
+
+Any surviving **block** → the readiness verdict is `revise-before-Forge`; otherwise `ready` (with should-fix / nice-to-have listed).
+
 ## Verification protocol (Phase 3)
 
 Every candidate finding must survive a **refute** pass before it reaches the report.
@@ -28,7 +38,7 @@ The cost of a false Blocker is a wasted dev cycle chasing a non-bug; the cost of
 
 ## Default output template (used when the repo supplies none)
 
-Author the report in **Spanish** by default (prose only — code, identifiers, paths, commands, `file:line`, severity keywords, and evidence hunks stay verbatim); `--lang en` switches to English. **Hard rule:** anything posted outward — a GitHub PR comment/review or a ClickUp comment — is ALWAYS in English regardless of the report language. Match the repo's template if it defines one. Otherwise:
+Author the report in the resolved language (**English by default**; Spanish when it resolves to `es` via `--lang es` / `REVIEW_STRICT_LANG=es`) — prose only; code, identifiers, paths, commands, `file:line`, severity keywords, and evidence hunks stay verbatim. **Hard rule:** anything posted outward — a GitHub PR comment/review or a ClickUp comment — is ALWAYS in English regardless of the report language. Match the repo's template if it defines one. Otherwise:
 
 **Localize the section headers to the report language** (default **English**; Spanish when the language resolves to `es` via `--lang es` / `REVIEW_STRICT_LANG=es`). The decision keywords (`request-changes` / `comment` / `approve`) map to GitHub review events and, together with all code / paths / commands / `file:line`, stay verbatim in every language. Default English template:
 

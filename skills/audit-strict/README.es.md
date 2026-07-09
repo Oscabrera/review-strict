@@ -18,7 +18,7 @@ Un entregable autocontenido en `audit-strict/` (in-repo por defecto; `<base>/aud
 
 | Archivo | Contenido |
 |---|---|
-| `README.md` | Resumen ejecutivo, top-10 riesgos, 10 recomendaciones clave, índice, limitaciones |
+| `README.md` | Resumen ejecutivo, **scorecard por dimensión (1–5)**, hallazgos agrupados por dimensión, mapa de cobertura, índice, limitaciones |
 | `componentes.md` | Mapa de componentes, dependencias, acoplamiento, SPOFs, hot paths |
 | `flujos.md` | Flujos end-to-end principales + `sequenceDiagram` Mermaid |
 | `ciclo-vida.md` | Estados/transiciones de la entidad + `stateDiagram-v2` Mermaid |

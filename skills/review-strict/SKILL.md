@@ -82,7 +82,7 @@ Each lens dispatch prompt MUST include:
 - In PR mode, the **PR's self-declared risks / AC-traceability** (Phase 1 step 4) as untrusted claims to verify.
 - (The checklist + finding contract already live in each agent's body — no need to inline them.)
 
-**Fallback:** if the typed `review-strict:*` agents are unavailable (e.g. the skill is running loose, not installed as a plugin), dispatch `subagent_type: general-purpose` and inline each lens's checklist from `references/lenses.md` instead.
+**Fallback:** if the typed `review-strict:*` agents are unavailable (e.g. the skill is running loose, not installed as a plugin), dispatch `subagent_type: general-purpose` and inline each lens's checklist **from the agent body itself** (`agents/lens-<name>.md`) — the agent body is the single source of truth. Do NOT inline from `references/lenses.md`; that file is a non-authoritative human-readable mirror that may lag the agent.
 
 The five lenses:
 1. **Correctness & requirements** — logic/arithmetic errors, inverted conditionals, contract/interface breaks, unhandled null/empty/boundary producing wrong behavior. Trace input → wrong output.
