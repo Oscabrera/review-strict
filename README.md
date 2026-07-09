@@ -1,3 +1,5 @@
+> 🌐 **English** · [Español](README.es.md)
+
 # review-strict
 
 A **strict, repo-adaptive PR / branch / diff reviewer** for Claude Code. It runs a
