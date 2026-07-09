@@ -64,6 +64,8 @@ Map internal P0/P1/P2 to the spec-native vocabulary **block / should-fix / nice-
 3. A short **coverage note**: which spec files existed, which lenses ran, what you could not assess.
 Errors only — no praise, no restating the spec. A clean spec yields an honest "ready — no blocking omissions" with any should-fix listed.
 
+**Apply the "Brevity & readability" rules** (see `../review-strict/references/severity-output.md`): lead with the readiness verdict + a ≤5-bullet TL;DR; **one line per finding** — `[block|should-fix|nice] spec_file — omission · Edit: <the spec edit, 1 sentence>`; keep the `codebase_evidence` anchor only on `block`/`should-fix`; hedge once in the coverage note. Brief in form, evidence intact.
+
 ## Phase 5 — Deliver
 
 - Print the review in chat.

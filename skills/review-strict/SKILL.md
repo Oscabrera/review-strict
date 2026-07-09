@@ -109,6 +109,7 @@ A finding survives only if the skeptic can point at the exact evidence. This is 
 1. Map severities into the **repo's vocabulary** (e.g. Blocker / Major / Minor) using the crosswalk in `references/severity-output.md`. Internally you reason in P0/P1/P2; you *report* in the repo's terms.
 2. Order findings most-severe first. Compute the header fields the repo's output policy requires (e.g. "Estimated effort to review: N/10", "Recommended focus areas").
 3. Render the report in the **repo's suggested output template** if it defines one; otherwise use the default in `references/severity-output.md`. Always include: Build Checks results (Phase 1), findings with `Why` + `Fix` + evidence anchor, and a final decision (`approve` / `request-changes` / `comment`).
+4. **Apply the "Brevity & readability" rules in `references/severity-output.md`** — lead with the decision + ≤5-bullet TL;DR, one line per finding, evidence hunk only for Blocker/Major, hedge once. Brief in form, evidence intact.
 4. State the final decision honestly: any surviving Blocker/P0 → `request-changes`.
 
 ## Phase 5 — Deliver

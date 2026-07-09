@@ -55,19 +55,17 @@ Author the report in the resolved language (**English by default**; Spanish when
 - Static analysis (<cmd>): <summary or "not run — reason (CI corroborates)">
 
 ## Findings
-<!-- most-severe first; omit a severity section if empty -->
+<!-- most-severe first; omit an empty severity section. ONE finding = ONE line. -->
 
 ### Blockers
-- [ ] **<file>:<line>** — <what>
-  - **Why:** <failure scenario — what breaks, when>
-  - **Fix:** <actionable direction>
-  - **Evidence:** `<diff hunk / snippet>`
+- [ ] **[P0] `<file>:<line>` — <what>** · Why: <one sentence> · Fix: <one sentence>
+  `<evidence hunk>`   <!-- evidence line ONLY for Blockers/Major -->
 
 ### Major
-- [ ] ...
+- [ ] **[P1] `<file>:<line>` — <what>** · Why: <one sentence> · Fix: <one sentence>
 
 ### Minor
-- [ ] ...
+- [ ] **[P2] `<file>:<line>` — <what>** · Fix: <one sentence>
 
 ## Reviewer attention (uncertain — needs human eyes)
 - <file>:<line> — <what to check and why>
@@ -83,6 +81,16 @@ Rules for the report:
 - **Every finding cites `file:line` + evidence.** Drop anything that can't.
 - **Final decision is honest:** any surviving Blocker → `request-changes`.
 - Keep it scannable: conclusion (decision) at the top, detail below.
+
+## Brevity & readability (applies to EVERY skill's output — review / audit / spec)
+
+**Brief in FORM, dense in EVIDENCE.** Same rigor, half the text, skimmable in ~30s. This is a hard output rule, not a preference.
+- **Lead with the conclusion** — the decision/verdict + a ≤5-bullet TL;DR at the very top. The reader must be able to decide without scrolling.
+- **One finding = one line:** `[sev] file:line — what · Why: <1 sentence> · Fix: <1 sentence>`. No multi-paragraph prose per finding.
+- **Evidence hunk only for the top severities** (Blocker/Major · P0/P1 · block). Minor / nice-to-have carry `file:line` + fix, no snippet.
+- **Hedge once, up top:** a single conditionality/confidence note (e.g. "P0 si expuesto", limitations, "no evidenciado") — never repeat caveats per finding.
+- **No narration, no duplication:** don't restate what the PR/repo/spec does; don't repeat the summary inside the detail.
+- **NEVER trade evidence for brevity** — keep every `file:line`, every fix, and the one global caveat. Cutting evidence to look short yields weak, unfalsifiable findings, the opposite of the goal. Shorten prose, never proof.
 
 ## Save-path resolution (Phase 5)
 
