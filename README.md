@@ -6,17 +6,46 @@ multi-agent, adversarially-verified code review at staff-engineer rigor
 repository's own rules, and archives a project-named report. It is independent of
 any spec/CI pipeline — point it at a PR, a branch, or a diff.
 
+The plugin ships **two sibling skills**: **`/review-strict`** (diff/PR review, above) and
+**`/audit-strict`** (deep whole-repo architecture audit — component map, flows, lifecycle,
+data model, quality audit + prioritized roadmap; see `skills/audit-strict/README.md`).
+
 ## Install
 
-This repo is self-contained (it is both the plugin and its own marketplace):
+This is a **public, self-contained** repo (it is both the plugin and its own marketplace):
 
 ```
 /plugin marketplace add Oscabrera/review-strict
 /plugin install review-strict
 ```
 
-Then invoke `/review-strict` in any repo. (Private repo? Installers need `gh`
-access to it. Public is easiest for sharing.)
+Then invoke `/review-strict` or `/audit-strict` in any repo.
+
+## Updating
+
+Installed plugins do **not** update on their own by default — you pull new versions explicitly:
+
+```
+/plugin marketplace update review-strict     # fetch the latest published version
+```
+
+To update automatically at session start, opt in **per user** in `~/.claude/settings.json`:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "review-strict": {
+      "source": { "source": "github", "repo": "Oscabrera/review-strict" },
+      "autoUpdate": true
+    }
+  }
+}
+```
+
+Releases are **version-gated**: consumers only move when the `version` in
+`.claude-plugin/marketplace.json` is bumped (see `CHANGELOG.md`) — intermediate commits to
+`main` are not pushed to anyone. Bumping `version` + updating `CHANGELOG.md` on a merge to
+`main` is what cuts a release.
 
 ## Usage
 
@@ -30,6 +59,16 @@ access to it. Public is easiest for sharing.)
 /review-strict 433 --lang es    # report in Spanish for this run
 /review-strict 433 --no-save    # print only, don't archive
 ```
+
+```
+/audit-strict                   # deep whole-repo audit (auto-detect stack)
+/audit-strict --stack vue       # force the Vue/Nuxt cartographers
+/audit-strict --out ~/notes     # write to ~/notes/audit-strict/<repo>/
+/audit-strict --model opus      # cartographers on Opus (default sonnet)
+/audit-strict --fast            # single-agent mode (cheaper, less rigorous)
+```
+
+See `skills/audit-strict/README.md` for the full `/audit-strict` reference.
 
 ## Configuration (per developer, via env vars)
 
