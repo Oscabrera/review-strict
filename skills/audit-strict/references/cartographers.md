@@ -1,6 +1,6 @@
 # Cartographers — the deep-analysis sub-agent briefs
 
-> **Note:** when installed as a plugin, each cartographer runs as a dedicated read-only agent under `agents/` (`review-strict:cart-*`), whose body carries the same checklist. This file is the canonical, human-readable spec **and** the fallback source the SKILL inlines when dispatching `general-purpose` (skill running loose, not installed). Keep the two in sync — same rule as `lenses.md`.
+> **⚠️ NON-AUTHORITATIVE MIRROR.** The **canonical** brief for each cartographer lives in its agent body under `agents/cart-*.md` — that is the single source of truth, used by both the typed dispatch and the `general-purpose` fallback (the SKILL inlines the agent body, not this file). This document is a human-readable overview only and **may lag the agents** (e.g. the `cart-quality` finding contract and its Dependencies & CVEs bucket live authoritatively in `agents/cart-quality.md`). Edit the agent; treat this as docs.
 
 Each cartographer is dispatched independently (Phase 2). Give each: the **verified inventory** (Phase 1), the relevant **Repo Review Profile** slice, the detected **stack**, and — for cart-quality — the **baseline slice** (`../../review-strict/references/baseline-criteria.md`). Each is language-agnostic in structure but must apply the **repo's own conventions** as ground truth.
 

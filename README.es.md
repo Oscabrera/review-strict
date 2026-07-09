@@ -118,7 +118,7 @@ Ramas: **`main`** es la rama estable/default desde la que instala el marketplace
 git init && git add -A && git commit -m "feat: review-strict plugin v1.0.0"
 git branch -M main
 git branch develop
-gh repo create Oscabrera/review-strict --private --source=. --remote=origin --push
+gh repo create Oscabrera/review-strict --public --source=. --remote=origin --push
 git push -u origin develop
 ```
 

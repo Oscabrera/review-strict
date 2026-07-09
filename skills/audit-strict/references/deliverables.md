@@ -2,7 +2,7 @@
 
 `/audit-strict` writes a **multi-file, self-contained** analysis to the resolved output dir — in-repo `<repo-root>/audit-strict/` by default, or `<base>/audit-strict/<repo>/` when a base is configured (see SKILL.md "Folder precedence"). Each file stands on its own (no "see the other file" cross-reference as the only content). All diagrams are embedded Mermaid. The `analisis.json` block must be valid JSON.
 
-## The nine files
+## The ten files
 
 | File | Owner (cartographer / synth) | Content |
 |---|---|---|
