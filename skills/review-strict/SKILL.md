@@ -87,7 +87,7 @@ Each lens dispatch prompt MUST include:
 The five lenses:
 1. **Correctness & requirements** — logic/arithmetic errors, inverted conditionals, contract/interface breaks, unhandled null/empty/boundary producing wrong behavior. Trace input → wrong output.
 2. **Security** — fail-open on empty/null, authn ≠ authz at resource level, SQL/command injection, secrets in code/logs/CLI, over-broad CORS, missing CSRF on state-changing routes, output-escaping bypasses, vulnerable deps.
-3. **Architecture, conventions & reuse** — repo red-line violations, layering/placement (logic in the wrong layer), duplication of existing helpers, N+1 and unbounded queries, cyclomatic complexity, decoupling.
+3. **Architecture, SOLID & reuse** — repo red-line violations, layering/placement (logic in the wrong layer), the "todo en un archivo" SRP/monolith smell, SOLID and design-pattern conformance to the repo's own patterns (evidenced only, never architecture-astronaut), duplication of existing helpers, N+1 and unbounded queries, cyclomatic complexity, decoupling.
 4. **Tests** — meaningful vs tautological (would the test fail if the impl were subtly wrong?), duplicated-logic oracles, unhappy-path/edge/idempotency coverage, stubs masquerading as coverage.
 5. **Migration & deploy safety** — two-phase/backward-compatible schema changes, reversibility (`down()`), no drop/rename of live columns, chunked/idempotent backfills, rollback plan.
 

@@ -64,6 +64,9 @@ Apply the repo's **red lines** (P0) and layering (from the profile) as the oracl
 - **Cyclomatic complexity / nesting:** methods that should be split, deep nesting that early-returns would flatten, God classes. P2 unless it hides a correctness risk.
 - **Decoupling:** hidden coupling, concrete dependencies where the repo injects contracts/interfaces. P1/P2 per impact.
 - **Repo project-specific conventions** (from the profile) — e.g. state only mutated in the sanctioned services, versioning/audit via the repo's repositories, cache-key shape, no new `sleep()` outside prompt services. Severity per what the rule says.
+- **SRP / monolithic file ("todo en un archivo")** — a new/changed file/class/method concentrating responsibilities the repo's layers keep apart (HTTP + business rules + data access + external I/O in one place; a method that validates + computes + persists + formats). Name the conflated responsibilities and where each belongs per the repo's layering. P1 (P0 if it crosses a red line like "no logic in controllers"). Apply the repo's declared size/complexity thresholds, else the baseline's.
+- **SOLID — evidenced only, anchored to how the repo already builds things** (never a purity opinion): S→SRP above; O→extending a type-code `switch`/`if` where the repo uses polymorphism/strategy; L→subclass breaking its base contract; I→fat interface forcing unused stubs; D→`new`/static instead of injecting the contract the repo defines. Cite the concrete symptom.
+- **Design-pattern conformance to the repo's patterns, not textbook ideals** — bypassing or ad-hoc-reimplementing an established pattern (Service/Repository/DTO/Action/Factory/Strategy/Observer…) is the finding; **do not** propose introducing a pattern the repo doesn't use unless it removes a concrete defect. **Guardrail:** cite `file:line` + the symptom; "feels un-SOLID"/"could be cleaner"/naming are not findings; repo conventions win.
 
 ## Lens 4 — Tests
 

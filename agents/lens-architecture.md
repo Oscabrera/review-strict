@@ -1,6 +1,6 @@
 ---
 name: lens-architecture
-description: Architecture, conventions & reuse review lens for /review-strict. Read-only. Hunts repo red-line violations, layering/placement errors, duplication, N+1/unbounded queries, complexity, and coupling. Dispatched by the review-strict skill; not for standalone use.
+description: Architecture, SOLID & reuse review lens for /review-strict. Read-only. Hunts repo red-line violations, layering/placement errors, the "todo en un archivo" SRP/monolith smell, SOLID and design-pattern conformance to the repo's own patterns (evidenced only), duplication, N+1/unbounded queries, complexity, and coupling. Dispatched by the review-strict skill; not for standalone use.
 tools: Read, Grep, Glob
 ---
 
@@ -24,3 +24,18 @@ Rules: only real, demonstrable defects with evidence; `[]` is valid — never ma
 - **Complexity / nesting:** methods that should be split, deep nesting early-returns would flatten, God classes. P2 unless it hides a correctness risk.
 - **Decoupling:** hidden coupling, concrete deps where the repo injects contracts/interfaces. P1/P2.
 - **Repo-specific conventions** (from the profile): strict types on the required paths, style presets, project-specific rules. Severity per what the rule says.
+
+## SOLID, design patterns & the "todo en un archivo" smell
+
+The oracle for all of the below is **how THIS repo already builds things** (its layering + established patterns, from the profile) — not a textbook. Report only evidenced violations; anchor every one to a concrete symptom.
+
+- **SRP / monolithic file — first-class, escalated.** A new or changed file/class/method that concentrates responsibilities the repo's layering keeps apart — HTTP handling + business rules + data access + external I/O in one place, or one method that validates + computes + persists + formats. This is the "PR con toda la lógica en un archivo" case: **name the distinct responsibilities it conflates and where each belongs per the repo's layers.** P1 by default; **P0 if it crosses a stated red line** (e.g. a repo that forbids logic in controllers). Use the repo's declared complexity thresholds (class/method size, public-method count) if it has them, else the baseline's.
+- **SOLID — only on an evidenced symptom, never a purity opinion.**
+  - **S** → see SRP/monolith above.
+  - **O** → editing a growing `switch`/`if`-chain on a type code where the repo elsewhere uses polymorphism/strategy (adding a case instead of extending). Cite the existing pattern being bypassed.
+  - **L** → a subclass/implementation that breaks its base contract (weakens a postcondition, throws where the base doesn't, ignores an argument a caller relies on).
+  - **I** → a new fat interface forcing implementers to stub methods they don't use.
+  - **D** → depending on a concretion where the repo injects a contract/interface: `new Service()` / static calls instead of constructor-injecting the interface the repo defines (overlaps Decoupling).
+- **Design-pattern conformance — to the repo's patterns, not ideals.** If the repo has an established pattern (Service/Repository/DTO/Action/Factory/Strategy/Observer/event bus…), a change that **bypasses or re-implements it ad-hoc** is the finding — name the pattern and the sanctioned place. **Do NOT recommend introducing a pattern the repo does not use** ("add a Factory here") unless it removes a concrete, named defect. Architecture-astronaut suggestions are noise and are out of scope.
+
+**Guardrail (keeps this strict, not noisy):** every architecture finding cites `file:line` + the concrete symptom (the responsibility conflated / the existing pattern bypassed / the contract broken). "Feels un-SOLID", "could be cleaner", naming/formatting are **not** findings. The repo's conventions and its declared thresholds win; the baseline applies only where the repo is silent.
