@@ -42,10 +42,12 @@ The oracle for all of the below is **how THIS repo already builds things** (its 
 
 ## Complexity & size budgets (concrete metrics, inspired by PHPMD + PHP Insights)
 
-Concrete numbers beat "this is complex". **Thresholds come from the repo first, defaults second:**
-1. **Repo config wins** — if the repo configures limits (`phpmd.xml`/`phpmd.xml.dist`, `phpinsights.php`, a PHPStan cognitive/cyclomatic rule, or numbers stated in `AGENTS.md`/`CLAUDE.md`), cite the **repo's** number, not the default.
-2. **Read CI evidence** — if the repo runs PHPMD/PHP Insights/PHPStan in CI, summarize that output (like Pint/PHPStan in Phase 1); do not recompute metrics by hand.
-3. **Baseline defaults** (below) apply only where the repo is silent.
+Concrete numbers beat "this is complex".
+
+**Most Cyberpuerta repos do NOT run PHPMD or PHP Insights** — do not count on CI evidence for these. Your measurement is primarily **your own count from the changed code**:
+- **Thresholds:** repo config wins if present (`phpmd.xml`/`phpmd.xml.dist`, `phpinsights.php`, a PHPStan cognitive/cyclomatic rule, or numbers in `AGENTS.md`/`CLAUDE.md`) — cite the repo's number; else the baseline defaults below.
+- **Measurement (primary):** count it yourself from the diff / the changed file (Read it). Report **exact counts** for what is exactly countable — method length, class length, parameter count, public-method/method/field counts, nesting depth. For **cyclomatic complexity, count decision points** in the changed method (1 + each `if`/`elseif`/`case`/`for`/`foreach`/`while`/`catch`/`&&`/`||`/`?:`/`??`) and report it as an **estimate** ("CC ≈ N"), never as a tool-precise figure you don't have. Be honest about estimate vs exact.
+- **Evidence (bonus, not expected):** only if the repo actually runs PHPMD/PHP Insights/PHPStan-complexity in CI, read that output and cite its exact numbers instead of estimating.
 
 Flag a finding when the **diff introduces or worsens** a method/class past a threshold — this is a diff review, not a full-repo scan (that's PHPMD's / `/audit-strict`'s job). Severity **P2** (refactor candidate) unless the complexity hides a correctness/security risk → escalate.
 

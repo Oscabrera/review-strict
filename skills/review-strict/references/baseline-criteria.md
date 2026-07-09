@@ -12,7 +12,7 @@ This is the independent standard `/review-strict` applies **on top of** whatever
 
 4. **Performance hygiene.** No read or write N+1; no unbounded materialization of a table into memory (prefer anti-joins + bounded `whereIn` over chunks); bounded worker memory; real indexes on the columns actually filtered.
 
-5. **Low cyclomatic complexity.** Small, single-responsibility methods; flatten nesting with early returns/guard clauses. Report complexity with a **concrete metric and number**, not "too complex" — cyclomatic complexity is the headline; also weighted class complexity (Σ of method CC), method/class length, parameter count, public-method count and coupling. Prefer the repo's configured limits (`phpmd.xml`/`phpinsights.php`/PHPStan) and its CI output; the architecture lens carries the default budget table (PHPMD-derived) for when the repo is silent.
+5. **Low cyclomatic complexity.** Small, single-responsibility methods; flatten nesting with early returns/guard clauses. Report complexity with a **concrete metric and number**, not "too complex" — cyclomatic complexity is the headline; also weighted class complexity (Σ of method CC), method/class length, parameter count, public-method count and coupling. Since PHPMD/PHP Insights usually aren't wired into these repos, **count it from the changed code yourself** (exact where countable; CC as an estimate from decision points). Repo-configured limits (`phpmd.xml`/`phpinsights.php`/PHPStan) win on thresholds; the architecture lens carries the PHPMD-derived default budget when the repo is silent.
 
 6. **Decoupling.** Depend on contracts/interfaces; inject dependencies; avoid hidden coupling.
 

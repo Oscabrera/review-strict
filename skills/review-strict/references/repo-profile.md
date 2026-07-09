@@ -6,7 +6,7 @@ The profile is what makes `/review-strict` repo-adaptive. Build it in Phase 0, b
 
 - `REPO_ROOT = git rev-parse --show-toplevel`.
 - Stack: read `composer.json` (Laravel/PHP? `require.php`, `laravel/framework`), `package.json` (Vue/React/TS?), presence of `phpunit.xml`, `pint.json`, `phpstan.neon`.
-- **Complexity/quality config:** look for `phpmd.xml`(`.dist`), `phpinsights.php`, and any PHPStan cognitive/cyclomatic-complexity rules. If present, extract the repo's configured thresholds (cyclomatic complexity, method/class length, parameter/method/field counts, coupling) — these become the architecture lens's `complexity_thresholds` and **override** the baseline defaults. If the repo runs PHPMD/PHP Insights in CI, note it so Phase 1 can read the evidence instead of recomputing.
+- **Complexity/quality config:** look for `phpmd.xml`(`.dist`), `phpinsights.php`, and any PHPStan cognitive/cyclomatic-complexity rules. If present, extract the repo's configured thresholds (cyclomatic complexity, method/class length, parameter/method/field counts, coupling) — these become the architecture lens's `complexity_thresholds` and **override** the baseline defaults. Most repos do NOT run PHPMD/PHP Insights — if one does, note it so Phase 1 can read the evidence; otherwise the architecture lens estimates complexity from the diff (it does not depend on the tools being installed).
 - Base branch: `--base` flag → else a configured base in `AGENTS.md`/CLAUDE.md workflow block (`git.base_branch`) → else `development` if it exists on origin → else `main`.
 - Docker: does the repo have a `docker-commands` skill or `docker-compose.yaml`? Capture the exec prefix (e.g. `docker compose exec -T app`) — most CP repos run pint/phpstan/pest **inside** the container.
 
