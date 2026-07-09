@@ -1,7 +1,7 @@
 {
   "name": "review-strict",
   "version": "1.1.0",
-  "description": "Two repo-adaptive, adversarially-verified analysis skills at staff-engineer rigor. /review-strict: multi-agent PR/branch/diff review (correctness, security, architecture, tests, migration safety). /audit-strict: deep whole-repo architecture audit — component map, flows, lifecycle, data model, quality audit and a prioritized roadmap written to .ai-abstracts/audit/. Both adapt to each repo's own rules (AGENTS.md, CLAUDE.md, .claude/skills) and share a verify-skeptic pass; English by default, configurable via env vars. Independent of any spec pipeline.",
+  "description": "Three repo-adaptive, adversarially-verified analysis skills at staff-engineer rigor, sharing a verify-skeptic pass and each repo's own rules (AGENTS.md, CLAUDE.md, .claude/skills). /spec-strict: pre-code review of a Stratos/Axiom spec dir (coverage, AC diff-checkability, verification-command sanity, grounded risk, layering fit, scope). /review-strict: multi-agent PR/branch/diff review (correctness, security, architecture+SOLID+complexity, tests, migration safety). /audit-strict: deep whole-repo architecture audit — component map, flows, lifecycle, data model, quality audit and a prioritized roadmap written to audit-strict/. Configurable via env vars; independent of any spec pipeline.",
   "owner": {
     "name": "Oscar Cabrera",
     "url": "https://github.com/Oscabrera"
