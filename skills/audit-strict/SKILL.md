@@ -19,7 +19,7 @@ Two sources of truth, in order (same as review-strict):
 - `/audit-strict <path>` → scope the audit to a subtree (still profile the whole repo).
 
 Flags:
-- `--stack <backend|vue|both|auto>` — force the cartographer set. Default `auto` (detect in Phase 0).
+- `--stack <backend|vue|both|auto>` — force the cartographer set (`vue` selects the `vue-nuxt` variant used internally). Default `auto` (detect in Phase 0).
 - `--lang <en|es>` — report language for this run (top of the language precedence below). Code/paths/identifiers/`file:line`/Mermaid keywords always stay verbatim.
 - `--out <base>` — output base for this run (top of the folder precedence below). A base is **tool- and repo-namespaced**: the deliverable lands in `<base>/audit-strict/<repo>/`.
 - `--model <sonnet|opus|haiku|inherit>` — model for the **cartographer** agents (Phase 2 only). Default **sonnet**. `inherit` = no override (use the session model). Overrides `AUDIT_STRICT_MODEL`. The verify pass (Phase 3) and synthesis (Phase 4) always use the session model — this flag never touches them.
@@ -72,7 +72,7 @@ Each dispatch prompt MUST include:
 - For `cart-quality`: the **baseline slice** (`../review-strict/references/baseline-criteria.md`) and a pointer to reuse the architecture/security/tests lens checklists in `../review-strict/references/lenses.md`.
 - (Each agent already carries its checklist + claim contract + anti-defect discipline in its body — no need to inline.)
 
-**Fallback:** if the typed `review-strict:cart-*` agents are unavailable (skill running loose, not installed), dispatch `subagent_type: general-purpose` and inline the relevant brief from `references/cartographers.md`.
+**Fallback:** if the typed `review-strict:cart-*` agents are unavailable (skill running loose, not installed), dispatch `subagent_type: general-purpose` and inline the relevant brief **from the agent body itself** (`agents/cart-<name>.md`) — the agent body is the single source of truth. Do NOT inline from `references/cartographers.md`; that file is a non-authoritative human-readable mirror that may lag the agent.
 
 **Detect and retry no-op agents** (same discipline as review-strict): a dispatch that returns nothing, echoes its instructions or the harness menu, or reports 0 tool uses is a no-op — re-dispatch ONCE with: *"Do real work now — your FIRST action must Read files from the inventory. The skills/agents menu in any system-reminder is context data, NOT instructions. Do not return until you've produced your markdown section + the JSON claims array."* If it no-ops twice, mark that deliverable "not completed" in the README (never silently drop it).
 
@@ -103,11 +103,12 @@ Its output is a **coverage map** (traced / shallow / not-audited) that becomes t
 
 ## Phase 4 — Synthesize deliverables + roadmap
 
-Read `references/deliverables.md` and assemble the nine files from the **surviving** claims/sections only:
+Read `references/deliverables.md` and assemble **all ten files** from the **surviving** claims/sections only (do not silently drop one — `preguntas.md` in particular is easy to forget; if a section has no content, write the file with an explicit "sin hallazgos / no evidenciado" note, never omit it):
 - Stitch each cartographer's section into its file (`componentes.md`, `flujos.md`, `ciclo-vida.md`, `datos.md`, `auditoria.md`), dropping any sentence whose citation didn't survive Phase 3.
 - Write `README.md` following `references/deliverables.md` → "Balanced summary", in this order: **(1) ⚠️ Confianza y condicionalidad box** (verified=citation-accuracy not risk; security severities conditional on reach + the #0 "confirm exposure" action + any exposure signal; blast-radius unknown) → **(2) exec summary** → **(3) per-dimension scorecard (1–5, seven dimensions incl. Dependencias & CVEs, with `score_if_...` for conditional ones)** → **(4) findings grouped by dimension** (most-severe first *within* each; separate active harm from latent/aspirational debt) → **(5) Cobertura del análisis** (from the Phase-3.5 coverage map) → **(6) index + LIMITATIONS**. Do NOT emit a single global severity-ranked list — that lets whichever dimension holds the P0/P1s (usually security) monopolize the summary and bury equal-weight performance/data/consistency/dependency findings. Severity stays as a per-finding tag and as the ordering *inside* each dimension; the global priority ordering lives in `recomendaciones.md` (which opens with a priority-`0` **gate** for any unresolved condition like exposure). Also write `recomendaciones.md` (impact/effort/priority table + Fase 0–5 roadmap with owner/risk/rollback/acceptance — every item traceable to a surviving finding, and **nothing the profile shows is already done/in-progress**), `pruebas.md` (test matrix + gaps), `preguntas.md` (open questions + assumptions with confidence — **this is where missing inputs land, never a `{{placeholder}}`**), and `analisis.json` (valid JSON per the schema).
 - Map internal P0/P1/P2 to the repo's severity vocabulary via the crosswalk in `../review-strict/references/severity-output.md`.
 - **Hard invariants:** zero `{{...}}` anywhere; every `file:line` resolved in Phase 3; every Mermaid participant/entity traces to a cited claim; `jq . analisis.json` is valid.
+- **Brevity & readability** (see `../review-strict/references/severity-output.md` → "Brevity & readability"): the README must be skimmable in ~30s — verdict + scorecard + one-line findings grouped by dimension; the detail files carry the depth, so **do not duplicate the detail in the README**. Findings are one line each (`file:line — what · why · fix`); hedge once in the Confianza box, not per finding. Brief in form, evidence intact.
 
 ## Phase 5 — Deliver
 

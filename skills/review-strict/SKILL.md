@@ -82,7 +82,7 @@ Each lens dispatch prompt MUST include:
 - In PR mode, the **PR's self-declared risks / AC-traceability** (Phase 1 step 4) as untrusted claims to verify.
 - (The checklist + finding contract already live in each agent's body — no need to inline them.)
 
-**Fallback:** if the typed `review-strict:*` agents are unavailable (e.g. the skill is running loose, not installed as a plugin), dispatch `subagent_type: general-purpose` and inline each lens's checklist from `references/lenses.md` instead.
+**Fallback:** if the typed `review-strict:*` agents are unavailable (e.g. the skill is running loose, not installed as a plugin), dispatch `subagent_type: general-purpose` and inline each lens's checklist **from the agent body itself** (`agents/lens-<name>.md`) — the agent body is the single source of truth. Do NOT inline from `references/lenses.md`; that file is a non-authoritative human-readable mirror that may lag the agent.
 
 The five lenses:
 1. **Correctness & requirements** — logic/arithmetic errors, inverted conditionals, contract/interface breaks, unhandled null/empty/boundary producing wrong behavior. Trace input → wrong output.
@@ -109,6 +109,7 @@ A finding survives only if the skeptic can point at the exact evidence. This is 
 1. Map severities into the **repo's vocabulary** (e.g. Blocker / Major / Minor) using the crosswalk in `references/severity-output.md`. Internally you reason in P0/P1/P2; you *report* in the repo's terms.
 2. Order findings most-severe first. Compute the header fields the repo's output policy requires (e.g. "Estimated effort to review: N/10", "Recommended focus areas").
 3. Render the report in the **repo's suggested output template** if it defines one; otherwise use the default in `references/severity-output.md`. Always include: Build Checks results (Phase 1), findings with `Why` + `Fix` + evidence anchor, and a final decision (`approve` / `request-changes` / `comment`).
+4. **Apply the "Brevity & readability" rules in `references/severity-output.md`** — lead with the decision + ≤5-bullet TL;DR, one line per finding, evidence hunk only for Blocker/Major, hedge once. Brief in form, evidence intact.
 4. State the final decision honestly: any surviving Blocker/P0 → `request-changes`.
 
 ## Phase 5 — Deliver

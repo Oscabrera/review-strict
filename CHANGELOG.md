@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.1
+- **Consistency & integrity fixes** (from a critical self-audit):
+  - **Single source of truth** — the agent body is canonical; the `general-purpose` fallback inlines the agent body (not the reference), and `references/lenses.md` + `references/cartographers.md` are now non-authoritative mirrors. Fixes the drift where typed vs fallback dispatch ran materially different reviews.
+  - **`verify-skeptic` generalized** across all three skills — per-dispatch severity vocabulary (P0/P1/P2 or block/should-fix/nice-to-have); added the spec crosswalk to `severity-output.md`.
+  - **spec-strict dispatch hardened** — explicit read-only + untrusted-spec injection guards on every lens.
+  - Fixed the English-default language self-contradiction; audit "nine files" → ten (no longer silently drops `preguntas.md`); `grounding.md` no longer implies cartographers can run graphify (they have no Bash); README `--private`→`--public`; spec-strict `--no-save` documented; `--stack vue` clarified; audit README (en+es) describes the balanced per-dimension scorecard, not the abolished "top-10 risks" list.
+- **Brevity & readability discipline** across all three skills — decision/verdict + ≤5-bullet TL;DR, one line per finding, evidence hunk only for top severities, hedge once. Brief in form, evidence intact (never trade a `file:line`/fix/caveat for brevity).
+
 ## 1.1.0
 - New sibling skill **`/audit-strict`** — deep, repo-adaptive whole-repository architecture audit (the constructive counterpart to the diff-scoped `/review-strict`).
 - Reverse-engineers the system into a multi-file `audit-strict/` deliverable: component map, end-to-end flows (`sequenceDiagram`), entity lifecycle (`stateDiagram-v2`), derived data model (`erDiagram`), quality audit, and a prioritized Fase 0–5 roadmap + `analisis.json`.

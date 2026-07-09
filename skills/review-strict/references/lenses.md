@@ -1,6 +1,6 @@
 # Review lenses — the five adversarial sub-agent briefs
 
-> **Note:** when installed as a plugin, each lens runs as a dedicated read-only agent under `agents/` (`review-strict:lens-*`), whose body carries the same checklist. This file is the canonical, human-readable spec **and** the fallback source the SKILL inlines when dispatching `general-purpose` (skill running loose, not installed). Keep the two in sync.
+> **⚠️ NON-AUTHORITATIVE MIRROR.** The **canonical** checklist for each lens lives in its agent body under `agents/lens-*.md` — that is the single source of truth, and it is what both the typed dispatch and the `general-purpose` fallback use (the SKILL inlines the agent body, not this file). This document is a human-readable overview only and **may lag the agents**; never edit a lens's rules here expecting them to take effect. Edit the agent; treat this as docs.
 
 
 Each lens is dispatched as an independent `general-purpose` sub-agent (Phase 2). Give each agent: the diff + changed-file list, the relevant slice of the Repo Review Profile, its checklist below, and the finding contract. Each lens is **language-agnostic in structure** but must apply the **repo's own conventions** (from the profile) as concrete verification targets.

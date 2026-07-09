@@ -12,6 +12,16 @@ Reason internally in P0/P1/P2; report in the **repo's vocabulary** (from the pro
 
 If the repo defines different words or levels, map onto them and keep the "blocks merge" column semantics.
 
+**Spec-review vocabulary (`/spec-strict`).** A spec review reports readiness, not merge-blocking, so it uses its own words that map 1:1 onto the internal levels:
+
+| Internal | Spec term | Meaning |
+|---|---|---|
+| **P0** | **block** | Omission that will cause a runtime fatal / re-open / wrong-stack command / unauthorized red-line — fix the spec before Forge. |
+| **P1** | **should-fix** | Will cost a fix commit or a reviewer round-trip. |
+| **P2** | **nice-to-have** | Clarity / robustness. |
+
+Any surviving **block** → the readiness verdict is `revise-before-Forge`; otherwise `ready` (with should-fix / nice-to-have listed).
+
 ## Verification protocol (Phase 3)
 
 Every candidate finding must survive a **refute** pass before it reaches the report.
@@ -28,7 +38,7 @@ The cost of a false Blocker is a wasted dev cycle chasing a non-bug; the cost of
 
 ## Default output template (used when the repo supplies none)
 
-Author the report in **Spanish** by default (prose only — code, identifiers, paths, commands, `file:line`, severity keywords, and evidence hunks stay verbatim); `--lang en` switches to English. **Hard rule:** anything posted outward — a GitHub PR comment/review or a ClickUp comment — is ALWAYS in English regardless of the report language. Match the repo's template if it defines one. Otherwise:
+Author the report in the resolved language (**English by default**; Spanish when it resolves to `es` via `--lang es` / `REVIEW_STRICT_LANG=es`) — prose only; code, identifiers, paths, commands, `file:line`, severity keywords, and evidence hunks stay verbatim. **Hard rule:** anything posted outward — a GitHub PR comment/review or a ClickUp comment — is ALWAYS in English regardless of the report language. Match the repo's template if it defines one. Otherwise:
 
 **Localize the section headers to the report language** (default **English**; Spanish when the language resolves to `es` via `--lang es` / `REVIEW_STRICT_LANG=es`). The decision keywords (`request-changes` / `comment` / `approve`) map to GitHub review events and, together with all code / paths / commands / `file:line`, stay verbatim in every language. Default English template:
 
@@ -45,19 +55,17 @@ Author the report in **Spanish** by default (prose only — code, identifiers, p
 - Static analysis (<cmd>): <summary or "not run — reason (CI corroborates)">
 
 ## Findings
-<!-- most-severe first; omit a severity section if empty -->
+<!-- most-severe first; omit an empty severity section. ONE finding = ONE line. -->
 
 ### Blockers
-- [ ] **<file>:<line>** — <what>
-  - **Why:** <failure scenario — what breaks, when>
-  - **Fix:** <actionable direction>
-  - **Evidence:** `<diff hunk / snippet>`
+- [ ] **[P0] `<file>:<line>` — <what>** · Why: <one sentence> · Fix: <one sentence>
+  `<evidence hunk>`   <!-- evidence line ONLY for Blockers/Major -->
 
 ### Major
-- [ ] ...
+- [ ] **[P1] `<file>:<line>` — <what>** · Why: <one sentence> · Fix: <one sentence>
 
 ### Minor
-- [ ] ...
+- [ ] **[P2] `<file>:<line>` — <what>** · Fix: <one sentence>
 
 ## Reviewer attention (uncertain — needs human eyes)
 - <file>:<line> — <what to check and why>
@@ -73,6 +81,16 @@ Rules for the report:
 - **Every finding cites `file:line` + evidence.** Drop anything that can't.
 - **Final decision is honest:** any surviving Blocker → `request-changes`.
 - Keep it scannable: conclusion (decision) at the top, detail below.
+
+## Brevity & readability (applies to EVERY skill's output — review / audit / spec)
+
+**Brief in FORM, dense in EVIDENCE.** Same rigor, half the text, skimmable in ~30s. This is a hard output rule, not a preference.
+- **Lead with the conclusion** — the decision/verdict + a ≤5-bullet TL;DR at the very top. The reader must be able to decide without scrolling.
+- **One finding = one line:** `[sev] file:line — what · Why: <1 sentence> · Fix: <1 sentence>`. No multi-paragraph prose per finding.
+- **Evidence hunk only for the top severities** (Blocker/Major · P0/P1 · block). Minor / nice-to-have carry `file:line` + fix, no snippet.
+- **Hedge once, up top:** a single conditionality/confidence note (e.g. "P0 si expuesto", limitations, "no evidenciado") — never repeat caveats per finding.
+- **No narration, no duplication:** don't restate what the PR/repo/spec does; don't repeat the summary inside the detail.
+- **NEVER trade evidence for brevity** — keep every `file:line`, every fix, and the one global caveat. Cutting evidence to look short yields weak, unfalsifiable findings, the opposite of the goal. Shorten prose, never proof.
 
 ## Save-path resolution (Phase 5)
 
