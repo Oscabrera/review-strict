@@ -8,6 +8,7 @@
   "plugins": [
     {
       "name": "review-strict",
+      "version": "1.1.0",
       "description": "Strict, repo-adaptive, multi-agent PR/branch/diff reviewer (/review-strict) + deep whole-repo architecture audit (/audit-strict).",
       "source": {
         "source": "github",
