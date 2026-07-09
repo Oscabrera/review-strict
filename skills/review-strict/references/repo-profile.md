@@ -6,6 +6,7 @@ The profile is what makes `/review-strict` repo-adaptive. Build it in Phase 0, b
 
 - `REPO_ROOT = git rev-parse --show-toplevel`.
 - Stack: read `composer.json` (Laravel/PHP? `require.php`, `laravel/framework`), `package.json` (Vue/React/TS?), presence of `phpunit.xml`, `pint.json`, `phpstan.neon`.
+- **Complexity/quality config:** look for `phpmd.xml`(`.dist`), `phpinsights.php`, and any PHPStan cognitive/cyclomatic-complexity rules. If present, extract the repo's configured thresholds (cyclomatic complexity, method/class length, parameter/method/field counts, coupling) — these become the architecture lens's `complexity_thresholds` and **override** the baseline defaults. Most repos do NOT run PHPMD/PHP Insights — if one does, note it so Phase 1 can read the evidence; otherwise the architecture lens estimates complexity from the diff (it does not depend on the tools being installed).
 - Base branch: `--base` flag → else a configured base in `AGENTS.md`/CLAUDE.md workflow block (`git.base_branch`) → else `development` if it exists on origin → else `main`.
 - Docker: does the repo have a `docker-commands` skill or `docker-compose.yaml`? Capture the exec prefix (e.g. `docker compose exec -T app`) — most CP repos run pint/phpstan/pest **inside** the container.
 
@@ -39,6 +40,7 @@ Hold these fields (in memory) and inject the relevant slice into each lens/verif
 - `red_lines[]` — from AGENTS.md/CLAUDE.md (always Blocker)
 - `project_specific_checks[]` — e.g. SEO-AI orchestration/idempotency/AI-integration rules
 - `commands` = { lint, static, test } with the docker prefix applied
+- `complexity_thresholds` — from `phpmd.xml`/`phpinsights.php`/PHPStan if declared; else null (architecture lens falls back to its PHPMD-derived baseline budget)
 - `migration_policy` (two-phase deploy checklist)
 - `save_path_pattern` + re-run naming
 - `anti_patterns[]`

@@ -8,7 +8,8 @@
   "plugins": [
     {
       "name": "review-strict",
-      "description": "Strict, repo-adaptive, multi-agent PR/branch/diff reviewer.",
+      "version": "1.1.0",
+      "description": "Repo-adaptive, adversarially-verified analysis: /spec-strict (pre-code spec review) + /review-strict (PR/branch/diff review, incl. SOLID & complexity) + /audit-strict (deep whole-repo architecture audit).",
       "source": {
         "source": "github",
         "repo": "Oscabrera/review-strict",
