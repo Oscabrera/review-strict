@@ -60,7 +60,7 @@ Releases are **version-gated**: consumers only move when the `version` in
 /spec-strict IT-52986           # resolve specs/IT-52986-*/ on this branch
 /spec-strict specs/IT-123-x/    # explicit spec dir
 /spec-strict --fast             # single-agent mode (cheaper, less rigorous)
-/spec-strict --model opus       # lenses on the session model (default sonnet)
+/spec-strict --model opus       # force all lenses on one model (default: hybrid)
 /spec-strict --lang es          # review in Spanish
 ```
 
@@ -73,7 +73,7 @@ See `skills/spec-strict/README.md` for the full `/spec-strict` reference.
 /review-strict 433 --repo-copy # also copy the report to the repo's reviews path
 /review-strict 433 --post      # post the review to GitHub (asks first; always English)
 /review-strict --fast          # single-agent mode (cheaper, less rigorous)
-/review-strict 433 --model opus # lenses on the session model (default sonnet)
+/review-strict 433 --model opus # force all lenses on one model (default: hybrid)
 /review-strict 433 --lang es    # report in Spanish for this run
 /review-strict 433 --no-save    # print only, don't archive
 ```
@@ -94,11 +94,11 @@ See `skills/audit-strict/README.md` for the full `/audit-strict` reference.
 |---|---|---|
 | `REVIEW_STRICT_ARCHIVE_DIR` | *(unset)* | When set, reports archive to `$REVIEW_STRICT_ARCHIVE_DIR/<repo>/<file>`. When unset, they archive **inside the reviewed repo** at `reviews/<project>-pr-<N>.md` (portable — everyone has it). |
 | `REVIEW_STRICT_LANG` | `en` | Report language: `en` or `es`. The `--lang <en|es>` flag overrides it per run. |
-| `REVIEW_STRICT_MODEL` | `sonnet` | Model for `/review-strict`'s 5 lens agents (`sonnet`/`opus`/`haiku`/`inherit`). `--model` overrides it. **The main cost lever** — lenses run cheap while the verify pass + synthesis stay on the session model. |
-| `SPEC_STRICT_MODEL` | `sonnet` | Same, for `/spec-strict`'s 6 lens agents. |
-| `AUDIT_STRICT_MODEL` | `sonnet` | Same, for `/audit-strict`'s 5 cartographers (Phase 2 only). |
+| `REVIEW_STRICT_MODEL` | *(hybrid)* | Forces `/review-strict`'s 5 lenses to one uniform model (`sonnet`/`opus`/`haiku`/`inherit`); `--model` overrides it. **Unset = hybrid** (the default): deep lenses (correctness, security, architecture) on the session model, mechanical (tests, migration) on Sonnet. **The main cost lever.** |
+| `SPEC_STRICT_MODEL` | *(hybrid)* | Same for `/spec-strict`'s 6 lenses — hybrid: coverage/risk/architecture/scope on the session model, ac-quality/verification on Sonnet. |
+| `AUDIT_STRICT_MODEL` | `sonnet` | Model for `/audit-strict`'s 5 cartographers (Phase 2 only). |
 
-All three model knobs cheapen only the read-heavy fan-out; the adversarial verify pass always runs on your session model, so the rigor gate is never lowered. External comments (GitHub / ClickUp via `--post`) are **always English**, regardless of report language.
+The model knobs only touch the read-heavy fan-out; the adversarial verify pass always runs on your session model, so the rigor gate is never lowered. External comments (GitHub / ClickUp via `--post`) are **always English**, regardless of report language.
 
 Reports are review **output**, not source — the in-repo `reviews/` folder is a good
 `.gitignore` candidate unless your team wants review history committed.

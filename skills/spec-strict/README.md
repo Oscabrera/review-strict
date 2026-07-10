@@ -37,7 +37,8 @@ Grounded in the actual codebase and adversarially verified — every finding is 
 /spec-strict IT-52986            # resolve specs/IT-52986-*/ on this branch
 /spec-strict specs/IT-123-x/     # explicit spec dir
 /spec-strict --fast              # single-agent mode (cheaper, less rigorous)
-/spec-strict --model opus        # run the lenses on the session model (max depth)
+/spec-strict --model opus        # all lenses on the session model (max depth)
+/spec-strict --model sonnet      # all lenses on Sonnet (cheapest, for bulk runs)
 /spec-strict --lang es           # review in Spanish
 /spec-strict --out docs/         # write the review to a chosen dir
 ```
@@ -56,7 +57,7 @@ A `spec-review.md` (written next to the spec by default) with a **readiness verd
 - **Read-only.** Never edits `spec.md`/`plan.json`/`pr.md`/`validation.md` — the human or Axiom applies the edits. Never commits, branches, or opens PRs.
 - **Repo conventions win** — never demands a pattern the repo doesn't use.
 - Shares `REVIEW_STRICT_LANG` / `REVIEW_STRICT_ARCHIVE_DIR` with the rest of the plugin.
-- **Cost:** the 6 lens agents run on `SPEC_STRICT_MODEL` / `--model` (default **Sonnet**), while the adversarial verify pass stays on your session model — the rigor gate is untouched. When `graphify-out/` exists, Phase-1 grounding queries the graph before grep, cutting reads. Use `--model inherit`/`opus` for a maximum-depth review.
+- **Cost:** by default the 6 lenses run on a **hybrid split** — the deep ones (coverage, risk, architecture, scope) on your session model, the mechanical ones (ac-quality, verification) on **Sonnet** — while the adversarial verify pass always stays on the session model, so the rigor gate is untouched. `SPEC_STRICT_MODEL` / `--model` force a uniform model (`--model sonnet` cheapest, `--model inherit`/`opus` max depth). When `graphify-out/` exists, Phase-1 grounding queries the graph before grep, cutting reads.
 
 ## Not yet (roadmap)
 
