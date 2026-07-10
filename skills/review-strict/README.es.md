@@ -19,6 +19,7 @@ Revisa un diff con rigor de staff engineer y **solo reporta errores** (nada de "
 /review-strict 433 --repo-copy    # además copia al path de reviews del repo (.ai/pr-reviews)
 /review-strict 433 --post         # publica en GitHub (pide confirmación; siempre en inglés)
 /review-strict --fast             # 1 solo agente (más barato, menos riguroso)
+/review-strict 433 --model opus   # corre las lentes en el modelo de sesión (máx profundidad)
 /review-strict 433 --lang es      # reporte en español para esta corrida
 /review-strict 433 --no-save      # no archivar (solo imprimir)
 ```
@@ -27,14 +28,15 @@ Revisa un diff con rigor de staff engineer y **solo reporta errores** (nada de "
 
 - **`REVIEW_STRICT_ARCHIVE_DIR`** — carpeta donde se archivan los reportes. Si NO está definida, el reporte cae **dentro del repo revisado** en `reviews/<proyecto>-pr-<N>.md` (portable, todos lo tienen). Si la defines, se usa `$REVIEW_STRICT_ARCHIVE_DIR/<repo>/<archivo>` (útil para una carpeta central de notas).
 - **`REVIEW_STRICT_LANG`** — idioma del reporte: `en` (por defecto) o `es`. El flag `--lang <en|es>` lo sobreescribe por corrida.
+- **`REVIEW_STRICT_MODEL`** — modelo de las 5 lentes: `sonnet` (por defecto), `opus`, `haiku` o `inherit` (usa el modelo de sesión). El flag `--model` lo sobreescribe por corrida. **Es la palanca principal de costo:** las lentes (lectura pesada) corren en Sonnet más barato por defecto, mientras el pase adversarial de verificación + la síntesis se quedan en tu modelo de sesión, así el gate de rigor no se toca. Pon `REVIEW_STRICT_MODEL=inherit` si quieres lentes de tier completo como default.
 - **Regla firme:** lo publicado hacia afuera (comentario en GitHub o ClickUp con `--post`) va **siempre en inglés**, sin importar el idioma del reporte.
 
 ## Cómo funciona (6 fases)
 
 0. **Perfila el repo** — `AGENTS.md` + `CLAUDE.md` + `.claude/skills/*` (y `.aiassistant/rules/*` solo si existen). Precedencia local-gana.
 1. **Diff + toolchain** — saca el diff, excluye ruido (`specs/`, `vendor/`, `evidence/`, lockfiles) y captura Pint/PHPStan best-effort (usa evidencia/CI si existe; si no, lo omite — nunca bloquea).
-2. **Fan-out de 5 lentes** (agentes independientes): corrección/#4, seguridad, arquitectura/reuso, tests, migración. Detecta agentes no-op y reintenta.
-3. **Verificación adversarial** — pase escéptico que mata falsos positivos (default-refute).
+2. **Fan-out de 5 lentes** (agentes independientes, en `REVIEW_STRICT_MODEL`/`--model`, Sonnet por defecto): corrección/#4, seguridad, arquitectura/reuso, tests, migración. Detecta agentes no-op y reintenta.
+3. **Verificación adversarial** — pase escéptico que mata falsos positivos (default-refute; siempre en el modelo de sesión).
 4. **Síntesis** — severidad en vocab del repo (Blocker/Major/Minor), más severo primero.
 5. **Entrega** — imprime + archiva (ver `REVIEW_STRICT_ARCHIVE_DIR`); `--post` publica en GitHub con confirmación.
 

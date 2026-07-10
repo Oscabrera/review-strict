@@ -59,6 +59,7 @@ empujan a nadie. Subir `version` + actualizar `CHANGELOG.md` al mergear a `main`
 /spec-strict IT-52986           # resuelve specs/IT-52986-*/ en esta rama
 /spec-strict specs/IT-123-x/    # spec dir explícito
 /spec-strict --fast             # modo single-agent (más barato, menos riguroso)
+/spec-strict --model opus       # lentes en el modelo de sesión (default sonnet)
 /spec-strict --lang es          # revisión en español
 ```
 
@@ -71,6 +72,7 @@ Ver `skills/spec-strict/README.md` para la referencia completa de `/spec-strict`
 /review-strict 433 --repo-copy # además copia el reporte al path de reviews del repo
 /review-strict 433 --post      # publica el review en GitHub (pide confirmación; siempre en inglés)
 /review-strict --fast          # modo single-agent (más barato, menos riguroso)
+/review-strict 433 --model opus # lentes en el modelo de sesión (default sonnet)
 /review-strict 433 --lang es    # reporte en español para esta corrida
 /review-strict 433 --no-save    # solo imprime, no archiva
 ```
@@ -91,8 +93,11 @@ Ver `skills/audit-strict/README.md` para la referencia completa de `/audit-stric
 |---|---|---|
 | `REVIEW_STRICT_ARCHIVE_DIR` | *(sin definir)* | Si se define, los reportes se archivan en `$REVIEW_STRICT_ARCHIVE_DIR/<repo>/<archivo>`. Si no, se archivan **dentro del repo revisado** en `reviews/<proyecto>-pr-<N>.md` (portable — todos lo tienen). |
 | `REVIEW_STRICT_LANG` | `en` | Idioma del reporte: `en` o `es`. El flag `--lang <en|es>` lo sobreescribe por corrida. |
+| `REVIEW_STRICT_MODEL` | `sonnet` | Modelo de las 5 lentes de `/review-strict` (`sonnet`/`opus`/`haiku`/`inherit`). `--model` lo sobreescribe. **La palanca principal de costo** — las lentes corren baratas mientras el pase de verificación + la síntesis se quedan en el modelo de sesión. |
+| `SPEC_STRICT_MODEL` | `sonnet` | Igual, para las 6 lentes de `/spec-strict`. |
+| `AUDIT_STRICT_MODEL` | `sonnet` | Igual, para los 5 cartógrafos de `/audit-strict` (solo Fase 2). |
 
-Los comentarios externos (GitHub / ClickUp vía `--post`) van **siempre en inglés**, sin importar el idioma del reporte.
+Las tres perillas de modelo abaratan solo el fan-out de lectura pesada; el pase adversarial de verificación siempre corre en tu modelo de sesión, así el gate de rigor nunca baja. Los comentarios externos (GitHub / ClickUp vía `--post`) van **siempre en inglés**, sin importar el idioma del reporte.
 
 Los reportes son **salida** de review, no código fuente — la carpeta in-repo `reviews/` es buena candidata para `.gitignore` a menos que tu equipo quiera commitear el historial de reviews.
 

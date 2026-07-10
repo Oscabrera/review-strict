@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0
+- **Cost lever — per-skill lens model, default `sonnet`.** `/review-strict` (5 lenses) and `/spec-strict` (6 lenses) now dispatch their read-heavy fan-out on **Sonnet by default** instead of inheriting the session model — the same split `/audit-strict` already used for its cartographers. New `--model <sonnet|opus|haiku|inherit>` flag + `REVIEW_STRICT_MODEL` / `SPEC_STRICT_MODEL` env vars (precedence: flag → env → `sonnet`).
+  - **Rigor gate untouched:** the adversarial `verify-skeptic` pass and the synthesis **always** run on the session model, regardless of `--model`. The knob only cheapens the readers, not the gate that kills false positives. Use `--model inherit` (or `opus`) for a maximum-depth review of a security-critical / high-blast-radius change, or set `REVIEW_STRICT_MODEL=inherit` to make full-tier lenses your standing default.
+- **`/spec-strict` graphify-first grounding.** Phase-1 grounding now queries `graphify-out/` (when present) before exhaustive `rg` to find callers/subclasses/layering — a scoped subgraph means fewer file reads for the same proof. Falls back to `rg`/glob when there's no graph; grounding still ends in real `file:line` facts.
+- Docs: `--model` documented in all skill READMEs (en+es) and the root config table (which now lists all three model env vars side by side); "Bounded cost" operating rules name the model as the primary lever.
+
 ## 1.1.1
 - **Consistency & integrity fixes** (from a critical self-audit):
   - **Single source of truth** — the agent body is canonical; the `general-purpose` fallback inlines the agent body (not the reference), and `references/lenses.md` + `references/cartographers.md` are now non-authoritative mirrors. Fixes the drift where typed vs fallback dispatch ran materially different reviews.
