@@ -37,6 +37,8 @@ Grounded en el codebase real y verificado adversarialmente — cada finding es u
 /spec-strict IT-52986            # resuelve specs/IT-52986-*/ en esta rama
 /spec-strict specs/IT-123-x/     # spec dir explícito
 /spec-strict --fast              # modo single-agent (más barato, menos riguroso)
+/spec-strict --model opus        # todas las lentes en el modelo de sesión (máx profundidad)
+/spec-strict --model sonnet      # todas las lentes en Sonnet (lo más barato, para lotes)
 /spec-strict --lang es           # revisión en español
 /spec-strict --out docs/         # escribe la revisión en un dir elegido
 ```
@@ -55,6 +57,7 @@ Un `spec-review.md` (junto al spec por defecto) con un **veredicto de readiness*
 - **Read-only.** Nunca edita `spec.md`/`plan.json`/`pr.md`/`validation.md` — el humano o Axiom aplica las ediciones. Nunca commitea, ni crea ramas o PRs.
 - **Las convenciones del repo ganan** — nunca exige un patrón que el repo no usa.
 - Comparte `REVIEW_STRICT_LANG` / `REVIEW_STRICT_ARCHIVE_DIR` con el resto del plugin.
+- **Costo:** por defecto las 6 lentes corren en un **split híbrido** — las profundas (coverage, risk, architecture, scope) en tu modelo de sesión, las mecánicas (ac-quality, verification) en **Sonnet** — mientras el pase adversarial de verificación siempre se queda en el modelo de sesión, así el gate de rigor no se toca. `SPEC_STRICT_MODEL` / `--model` fuerzan un modelo uniforme (`--model sonnet` lo más barato, `--model inherit`/`opus` máxima profundidad). Cuando existe `graphify-out/`, el grounding de la Fase 1 consulta el grafo antes de grep, reduciendo lecturas.
 
 ## Aún no (roadmap)
 

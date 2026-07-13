@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.0
+- **Cost lever — hybrid per-lens model.** `/review-strict` (5 lenses) and `/spec-strict` (6 lenses) now split their fan-out across model tiers instead of putting every lens on the session model:
+  - **Deep-reasoning lenses run on the session model** (review: correctness, security, architecture; spec: coverage, risk, architecture, scope) — these are where a missed subtle bug (a **false negative**) is most costly, so they keep the strong model.
+  - **Mechanical lenses run on Sonnet** (review: tests, migration; spec: ac-quality, verification) — tautological-test / two-phase-migration / wrong-stack-command / filler-table checks are checklist-style, where Sonnet is enough.
+  - **Rigor gate untouched:** the adversarial `verify-skeptic` pass and synthesis **always** run on the session model, in every mode.
+  - New `--model <sonnet|opus|haiku|inherit>` flag + `REVIEW_STRICT_MODEL` / `SPEC_STRICT_MODEL` env vars **force a uniform model for all lenses**, overriding the hybrid default: `--model sonnet` = cheapest (bulk runs), `--model inherit`/`opus` = maximum depth (every lens on the session model). Precedence: flag → env → hybrid.
+- **`/spec-strict` graphify-first grounding.** Phase-1 grounding now queries `graphify-out/` (when present) before exhaustive `rg` to find callers/subclasses/layering — a scoped subgraph means fewer file reads for the same proof. Falls back to `rg`/glob when there's no graph; grounding still ends in real `file:line` facts.
+- Docs: the hybrid split + `--model` documented in all skill READMEs (en+es) and the root config table (all three model env vars side by side); "Bounded cost" operating rules name the split, `--model sonnet`, and `--fast` as the cost levers.
+
 ## 1.1.1
 - **Consistency & integrity fixes** (from a critical self-audit):
   - **Single source of truth** — the agent body is canonical; the `general-purpose` fallback inlines the agent body (not the reference), and `references/lenses.md` + `references/cartographers.md` are now non-authoritative mirrors. Fixes the drift where typed vs fallback dispatch ran materially different reviews.
