@@ -19,6 +19,8 @@ Revisa un diff con rigor de staff engineer y **solo reporta errores** (nada de "
 /review-strict 433 --repo-copy    # además copia al path de reviews del repo (.ai/pr-reviews)
 /review-strict 433 --post         # publica en GitHub (pide confirmación; siempre en inglés)
 /review-strict --fast             # 1 solo agente (más barato, menos riguroso)
+/review-strict 433 --model opus   # todas las lentes en el modelo de sesión (máx profundidad)
+/review-strict 433 --model sonnet # todas las lentes en Sonnet (lo más barato, para lotes)
 /review-strict 433 --lang es      # reporte en español para esta corrida
 /review-strict 433 --no-save      # no archivar (solo imprimir)
 ```
@@ -27,14 +29,15 @@ Revisa un diff con rigor de staff engineer y **solo reporta errores** (nada de "
 
 - **`REVIEW_STRICT_ARCHIVE_DIR`** — carpeta donde se archivan los reportes. Si NO está definida, el reporte cae **dentro del repo revisado** en `reviews/<proyecto>-pr-<N>.md` (portable, todos lo tienen). Si la defines, se usa `$REVIEW_STRICT_ARCHIVE_DIR/<repo>/<archivo>` (útil para una carpeta central de notas).
 - **`REVIEW_STRICT_LANG`** — idioma del reporte: `en` (por defecto) o `es`. El flag `--lang <en|es>` lo sobreescribe por corrida.
+- **`REVIEW_STRICT_MODEL`** — fuerza **las 5 lentes a un solo modelo uniforme** (`sonnet`/`opus`/`haiku`/`inherit`); el flag `--model` lo sobreescribe por corrida. **Por defecto (sin definir) las lentes corren en un split híbrido:** las profundas (corrección, seguridad, arquitectura) en tu **modelo de sesión**, y las mecánicas (tests, migración) en **Sonnet**. Es la palanca principal de costo — el razonamiento profundo se mantiene fuerte (sin falsos negativos) mientras las lentes de checklist corren baratas. Pon `REVIEW_STRICT_MODEL=sonnet` para la corrida uniforme más barata (reviews en lote) o `=inherit` para poner toda lente en el modelo de sesión.
 - **Regla firme:** lo publicado hacia afuera (comentario en GitHub o ClickUp con `--post`) va **siempre en inglés**, sin importar el idioma del reporte.
 
 ## Cómo funciona (6 fases)
 
 0. **Perfila el repo** — `AGENTS.md` + `CLAUDE.md` + `.claude/skills/*` (y `.aiassistant/rules/*` solo si existen). Precedencia local-gana.
 1. **Diff + toolchain** — saca el diff, excluye ruido (`specs/`, `vendor/`, `evidence/`, lockfiles) y captura Pint/PHPStan best-effort (usa evidencia/CI si existe; si no, lo omite — nunca bloquea).
-2. **Fan-out de 5 lentes** (agentes independientes): corrección/#4, seguridad, arquitectura/reuso, tests, migración. Detecta agentes no-op y reintenta.
-3. **Verificación adversarial** — pase escéptico que mata falsos positivos (default-refute).
+2. **Fan-out de 5 lentes** (agentes independientes; híbrido por defecto — corrección/#4, seguridad, arquitectura en el modelo de sesión, tests + migración en Sonnet; `REVIEW_STRICT_MODEL`/`--model` fuerzan un modelo uniforme). Detecta agentes no-op y reintenta.
+3. **Verificación adversarial** — pase escéptico que mata falsos positivos (default-refute; siempre en el modelo de sesión).
 4. **Síntesis** — severidad en vocab del repo (Blocker/Major/Minor), más severo primero.
 5. **Entrega** — imprime + archiva (ver `REVIEW_STRICT_ARCHIVE_DIR`); `--post` publica en GitHub con confirmación.
 

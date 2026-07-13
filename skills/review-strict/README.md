@@ -19,6 +19,8 @@ Reviews a diff at staff-engineer rigor and **reports errors only** (no "looks go
 /review-strict 433 --repo-copy    # also copy to the repo's reviews path (.ai/pr-reviews)
 /review-strict 433 --post         # publish to GitHub (asks first; always English)
 /review-strict --fast             # single agent (cheaper, less rigorous)
+/review-strict 433 --model opus   # all lenses on the session model (max depth)
+/review-strict 433 --model sonnet # all lenses on Sonnet (cheapest, for bulk runs)
 /review-strict 433 --lang es      # report in Spanish for this run
 /review-strict 433 --no-save      # don't archive (print only)
 ```
@@ -27,14 +29,15 @@ Reviews a diff at staff-engineer rigor and **reports errors only** (no "looks go
 
 - **`REVIEW_STRICT_ARCHIVE_DIR`** — folder where reports are archived. If unset, the report lands **inside the reviewed repo** at `reviews/<project>-pr-<N>.md` (portable — everyone has it). If set, it uses `$REVIEW_STRICT_ARCHIVE_DIR/<repo>/<file>` (handy for a central notes folder).
 - **`REVIEW_STRICT_LANG`** — report language: `en` (default) or `es`. The `--lang <en|es>` flag overrides it per run.
+- **`REVIEW_STRICT_MODEL`** — forces **all 5 lenses to one uniform model** (`sonnet`/`opus`/`haiku`/`inherit`); `--model` overrides it per run. **By default (unset) the lenses run on a hybrid split:** the deep lenses (correctness, security, architecture) on your **session model**, the mechanical ones (tests, migration) on **Sonnet**. This is the main cost lever — deep reasoning stays strong (no false negatives) while checklist lenses run cheap. Set `REVIEW_STRICT_MODEL=sonnet` for the cheapest uniform run (bulk reviews) or `=inherit` to put every lens on the session model.
 - **Hard rule:** anything published outward (a GitHub or ClickUp comment via `--post`) is **always in English**, regardless of the report language.
 
 ## How it works (6 phases)
 
 0. **Profile the repo** — `AGENTS.md` + `CLAUDE.md` + `.claude/skills/*` (and `.aiassistant/rules/*` only if present). Local-wins precedence.
 1. **Diff + toolchain** — pulls the diff, excludes noise (`specs/`, `vendor/`, `evidence/`, lockfiles), and captures Pint/PHPStan best-effort (uses evidence/CI if present; otherwise skips — never blocks).
-2. **Fan-out of 5 lenses** (independent agents): correctness/#4, security, architecture & reuse, tests, migration. Detects no-op agents and retries.
-3. **Adversarial verification** — a skeptic pass that kills false positives (default-refute).
+2. **Fan-out of 5 lenses** (independent agents; hybrid by default — correctness/#4, security, architecture on the session model, tests + migration on Sonnet; `REVIEW_STRICT_MODEL`/`--model` force a uniform model). Detects no-op agents and retries.
+3. **Adversarial verification** — a skeptic pass that kills false positives (default-refute; always on the session model).
 4. **Synthesis** — severities in the repo's vocabulary (Blocker/Major/Minor), most-severe first.
 5. **Deliver** — prints + archives (see `REVIEW_STRICT_ARCHIVE_DIR`); `--post` publishes to GitHub after confirmation.
 
