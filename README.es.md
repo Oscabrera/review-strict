@@ -96,6 +96,29 @@ Ver `skills/audit-strict/README.md` para la referencia completa de `/audit-stric
 | `REVIEW_STRICT_MODEL` | *(híbrido)* | Fuerza las 5 lentes de `/review-strict` a un modelo uniforme (`sonnet`/`opus`/`haiku`/`inherit`); `--model` lo sobreescribe. **Sin definir = híbrido** (el default): lentes profundas (corrección, seguridad, arquitectura) en el modelo de sesión, mecánicas (tests, migración) en Sonnet. **La palanca principal de costo.** |
 | `SPEC_STRICT_MODEL` | *(híbrido)* | Igual para las 6 lentes de `/spec-strict` — híbrido: coverage/risk/architecture/scope en el modelo de sesión, ac-quality/verification en Sonnet. |
 | `AUDIT_STRICT_MODEL` | `sonnet` | Modelo de los 5 cartógrafos de `/audit-strict` (solo Fase 2). |
+| `REVIEW_STRICT_HOOK_BYPASS` | `0` | Ponla en `1` en una llamada suelta para saltarte el hook guardián de abajo (excepción deliberada). |
+
+## Enforcement: el guardián del archivo
+
+Definir `REVIEW_STRICT_ARCHIVE_DIR` era solo indicativo — `/spec-strict` la ignoró y
+escribió su review dentro del repo revisado, y 21 reportes quedaron commiteados en 5
+repos antes de que alguien lo notara. Un hook `PreToolUse` lo vuelve mecánico:
+
+- **Qué bloquea:** cualquier escritura cuyo basename destino sea `spec-review*.md` —el
+  nombre del fallback in-repo— **mientras `REVIEW_STRICT_ARCHIVE_DIR` esté definida**. La
+  rama del archivo escribe `<spec-slug>.md`, así que el basename por sí solo identifica
+  la rama equivocada, incluso cuando el directorio es una variable sin resolver.
+- **Cuándo no hace nada:** siempre que `REVIEW_STRICT_ARCHIVE_DIR` esté sin definir o
+  vacía. Ahí el default in-repo es el comportamiento documentado y el hook es no-op:
+  corrige una mala configuración, nunca te impone el archivo.
+- **Qué sigue permitido:** leer y **borrar** un `spec-review.md` (así se limpia el residuo
+  ya commiteado), escribir dentro del archivo mismo, y borradores en `/tmp`, `/var/tmp`,
+  `/private/tmp`, `$TMPDIR`.
+- **Falla abierto:** cualquier error interno permite la llamada con un `WARN` — un
+  guardián nunca debe romperte la sesión. `REVIEW_STRICT_HOOK_BYPASS=1` cubre la
+  excepción deliberada.
+
+Corre su suite con `./tests/hooks/test-block-inrepo-spec-review.sh` (bash puro, 30 casos).
 
 Las perillas de modelo solo tocan el fan-out de lectura pesada; el pase adversarial de verificación siempre corre en tu modelo de sesión, así el gate de rigor nunca baja. Los comentarios externos (GitHub / ClickUp vía `--post`) van **siempre en inglés**, sin importar el idioma del reporte.
 

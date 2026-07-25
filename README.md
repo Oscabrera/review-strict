@@ -97,6 +97,28 @@ See `skills/audit-strict/README.md` for the full `/audit-strict` reference.
 | `REVIEW_STRICT_MODEL` | *(hybrid)* | Forces `/review-strict`'s 5 lenses to one uniform model (`sonnet`/`opus`/`haiku`/`inherit`); `--model` overrides it. **Unset = hybrid** (the default): deep lenses (correctness, security, architecture) on the session model, mechanical (tests, migration) on Sonnet. **The main cost lever.** |
 | `SPEC_STRICT_MODEL` | *(hybrid)* | Same for `/spec-strict`'s 6 lenses — hybrid: coverage/risk/architecture/scope on the session model, ac-quality/verification on Sonnet. |
 | `AUDIT_STRICT_MODEL` | `sonnet` | Model for `/audit-strict`'s 5 cartographers (Phase 2 only). |
+| `REVIEW_STRICT_HOOK_BYPASS` | `0` | Set to `1` on a single call to bypass the archive-guard hook below (a deliberate one-off). |
+
+## Enforcement: the archive guard
+
+Setting `REVIEW_STRICT_ARCHIVE_DIR` used to be advisory — `/spec-strict` once ignored
+it and wrote its review into the reviewed repo instead, and 21 reports were committed
+into 5 repos before anyone noticed. A `PreToolUse` hook now makes it mechanical:
+
+- **What it blocks:** any write whose target basename matches `spec-review*.md` — the
+  in-repo fallback filename — **while `REVIEW_STRICT_ARCHIVE_DIR` is set**. The archive
+  branch writes `<spec-slug>.md`, so the basename alone identifies the wrong branch,
+  even when the directory is an unresolved shell variable.
+- **When it does nothing:** whenever `REVIEW_STRICT_ARCHIVE_DIR` is unset or empty. The
+  in-repo default is then the documented behavior, and the hook is a no-op — it corrects
+  a misconfiguration, it never imposes the archive on you.
+- **What stays allowed:** reading and **deleting** a `spec-review.md` (that is how
+  already-committed residue gets cleaned up), writes under the archive dir itself, and
+  drafts under `/tmp`, `/var/tmp`, `/private/tmp`, `$TMPDIR`.
+- **Fail-open:** any internal error allows the call with a `WARN` — a guard must never
+  break your session. `REVIEW_STRICT_HOOK_BYPASS=1` covers the deliberate one-off.
+
+Run its suite with `./tests/hooks/test-block-inrepo-spec-review.sh` (plain bash, 30 cases).
 
 The model knobs only touch the read-heavy fan-out; the adversarial verify pass always runs on your session model, so the rigor gate is never lowered. External comments (GitHub / ClickUp via `--post`) are **always English**, regardless of report language.
 
