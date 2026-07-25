@@ -2,6 +2,8 @@
 
 # spec-strict
 
+Available in Claude Code and Codex. On Codex, invoke `$spec-strict`; Codex inherits the session model unless a requested model selector is explicitly supported by the current host.
+
 A **strict, repo-adaptive review of a Stratos/Axiom spec — before any code is written.**
 The pre-code sibling of `/review-strict`: instead of reviewing a diff, it reviews the **spec
 dir** (`spec.md`, `plan.json`, `pr.md`, `validation.md`) on the feature branch and hunts the

@@ -1,0 +1,30 @@
+{
+  "name": "review-strict",
+  "version": "1.3.1",
+  "description": "Repo-adaptive, adversarially verified spec, diff, PR, branch, and whole-repository analysis at staff-engineer rigor.",
+  "author": {
+    "name": "Oscar Cabrera",
+    "url": "https://github.com/Oscabrera"
+  },
+  "homepage": "https://github.com/Oscabrera/review-strict",
+  "repository": "https://github.com/Oscabrera/review-strict",
+  "license": "MIT",
+  "keywords": ["pr-review", "code-review", "architecture", "static-analysis", "audit"],
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
+  "interface": {
+    "displayName": "Review Strict",
+    "shortDescription": "Strict spec, diff, PR, and architecture reviews",
+    "longDescription": "Three repo-adaptive analysis workflows: review a plan before coding, review a change before merge, or audit an entire repository. Findings are evidence-based and adversarially verified.",
+    "developerName": "Oscar Cabrera",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "websiteURL": "https://github.com/Oscabrera/review-strict",
+    "defaultPrompt": [
+      "Run review-strict on my current branch.",
+      "Run spec-strict on the current feature spec.",
+      "Run audit-strict on this repository."
+    ],
+    "brandColor": "#B42318"
+  }
+}

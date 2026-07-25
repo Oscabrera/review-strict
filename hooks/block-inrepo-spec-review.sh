@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# block-inrepo-spec-review.sh — PreToolUse hook for `Write`, `Edit` and `Bash`.
+# block-inrepo-spec-review.sh — PreToolUse hook for Claude/Codex edits and shell calls.
 #
 # Blocks writing a `/spec-strict` review INTO the reviewed repo when the
 # developer has configured a central archive via REVIEW_STRICT_ARCHIVE_DIR.
@@ -94,6 +94,15 @@ targets=""
 case "$tool" in
   Write|Edit)
     targets=$(printf '%s' "$payload" | jq -r '.tool_input.file_path // ""' 2>/dev/null || echo "")
+    ;;
+  apply_patch)
+    patch=$(printf '%s' "$payload" | jq -r '.tool_input.command // ""' 2>/dev/null || echo "")
+    [ -n "$patch" ] || exit 0
+    # Codex reports patch edits with canonical tool_name=apply_patch. Block
+    # Add/Update/Move destinations, while deliberately leaving Delete allowed.
+    targets=$(printf '%s' "$patch" | sed -nE \
+      -e 's/^\*\*\* (Add|Update) File: (.*spec-review[^/]*\.md)$/\2/p' \
+      -e 's/^\*\*\* Move to: (.*spec-review[^/]*\.md)$/\1/p')
     ;;
   Bash)
     cmd=$(printf '%s' "$payload" | jq -r '.tool_input.command // ""' 2>/dev/null || echo "")

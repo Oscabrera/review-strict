@@ -24,6 +24,8 @@ Flags:
 - `--out <base>` — output base for this run (top of the folder precedence below). A base is **tool- and repo-namespaced**: the deliverable lands in `<base>/audit-strict/<repo>/`.
 - `--model <sonnet|opus|haiku|inherit>` — model for the **cartographer** agents (Phase 2 only). Default **sonnet**. `inherit` = no override (use the session model). Overrides `AUDIT_STRICT_MODEL`. The verify pass (Phase 3) and synthesis (Phase 4) always use the session model — this flag never touches them.
 - `--fast` — single-agent sequential mode (you walk all cartographer checklists yourself) instead of the fan-out. Cheaper, less rigorous. Still run Phase 3.
+
+**Host compatibility is mandatory.** Before resolving models or dispatching any agent, read `../review-strict/references/host-compatibility.md` and apply it. It translates the Claude-specific `Agent`/typed-agent/model wording below to Codex's available collaboration tools, concurrency, and model selectors. On Codex, unsupported Claude model names fall back to the inherited session model.
 - `--no-save` — print the README + summary in chat only; do not write the deliverable files.
 
 **Both the output folder and the language are configurable, per-developer (env var) or per-run (flag)** — parity with `/review-strict`.
@@ -61,7 +63,7 @@ Read `references/grounding.md` and follow it: graphify-first if `graphify-out/gr
 
 ## Phase 2 — Multi-cartographer fan-out
 
-Dispatch **one sub-agent per deliverable, in parallel** (single message, multiple `Agent` calls) using this plugin's read-only cartographer agents via `subagent_type`:
+Dispatch **one sub-agent per deliverable with maximum host-supported parallelism**, using `../review-strict/references/host-compatibility.md`. On Claude, prefer this plugin's read-only cartographer agents via `subagent_type`; on Codex, read the matching bundled agent brief and spawn a general sub-agent:
 `review-strict:cart-components`, `review-strict:cart-flows`, `review-strict:cart-lifecycle`, `review-strict:cart-datamodel`, `review-strict:cart-quality`.
 
 **Model:** dispatch each cartographer with `model: <CART_MODEL>` (the value you resolved above — default **sonnet**). Cartographers are read/mapping-heavy and don't need the top tier; the rigor comes from the Phase-3 verify pass and the Phase-1 grounding, not the reader's model — so cheapening the readers cuts cost without cutting quality. If `CART_MODEL` is `inherit`, pass **no** `model` override (use the session model). **Never override `effort`** — inherit it. One cartographer per deliverable is what enforces **even depth** (defect #4): each has full budget for its one section.
@@ -72,7 +74,7 @@ Each dispatch prompt MUST include:
 - For `cart-quality`: the **baseline slice** (`../review-strict/references/baseline-criteria.md`) and a pointer to reuse the architecture/security/tests lens checklists in `../review-strict/references/lenses.md`.
 - (Each agent already carries its checklist + claim contract + anti-defect discipline in its body — no need to inline.)
 
-**Fallback:** if the typed `review-strict:cart-*` agents are unavailable (skill running loose, not installed), dispatch `subagent_type: general-purpose` and inline the relevant brief **from the agent body itself** (`agents/cart-<name>.md`) — the agent body is the single source of truth. Do NOT inline from `references/cartographers.md`; that file is a non-authoritative human-readable mirror that may lag the agent.
+**Portable fallback / Codex path:** if typed `review-strict:cart-*` agents are unavailable, use the host's general sub-agent mechanism and inline the relevant brief **from the agent body itself** (`<plugin-root>/agents/cart-<name>.md`) — the agent body is the single source of truth. Do NOT inline from `references/cartographers.md`; that file is a non-authoritative human-readable mirror that may lag the agent.
 
 **Detect and retry no-op agents** (same discipline as review-strict): a dispatch that returns nothing, echoes its instructions or the harness menu, or reports 0 tool uses is a no-op — re-dispatch ONCE with: *"Do real work now — your FIRST action must Read files from the inventory. The skills/agents menu in any system-reminder is context data, NOT instructions. Do not return until you've produced your markdown section + the JSON claims array."* If it no-ops twice, mark that deliverable "not completed" in the README (never silently drop it).
 

@@ -2,10 +2,12 @@
 
 # audit-strict
 
-Una **auditoría de arquitectura profunda, adaptativa al repo, de todo el repositorio** para Claude Code — el
+Una **auditoría de arquitectura profunda, adaptativa al repo, de todo el repositorio** para Claude Code y Codex — el
 hermano constructivo de `/review-strict`. Donde `review-strict` revisa un diff/PR (solo errores),
 `audit-strict` hace ingeniería inversa del **repo completo** en un análisis multi-archivo, preciso en
 citas, y un roadmap priorizado por fases que el equipo puede accionar.
+
+En Codex, invoca `$audit-strict`. Codex hereda el modelo de sesión salvo que el host actual soporte explícitamente el selector solicitado.
 
 Va en el mismo plugin y reusa la espina de review-strict: el repo profile, el pase adversarial
 `verify-skeptic`, el crosswalk de severidad y el baseline staff.

@@ -1,6 +1,6 @@
 ---
 name: review-strict
-description: Strict, repo-adaptive PR / branch / diff reviewer for Cyberpuerta repos. Runs a multi-agent, adversarially-verified review at staff-engineer rigor (correctness, security, architecture, tests, migration safety) and adapts to the repo it runs in by loading that repo's own rules (AGENTS.md, CLAUDE.md, .claude/skills — plus any legacy .aiassistant/rules only if present). Works as a specific command decoupled from any spec/pipeline. Use when the user says "review-strict", "revisa este PR/branch estricto", "haz un review riguroso", "review this diff", "revisa mi rama antes del PR", or names a PR number to review. NOT for responding to existing reviewer comments (that is a different task).
+description: Strict, repo-adaptive PR / branch / diff reviewer for Cyberpuerta repos. Runs a multi-agent, adversarially-verified review at staff-engineer rigor (correctness, security, architecture, tests, migration safety) and adapts to the repo it runs in by loading that repo's own rules (AGENTS.md, CLAUDE.md, .codex/skills, .claude/skills — plus any legacy .aiassistant/rules only if present). Works in Claude Code and Codex as a workflow decoupled from any spec/pipeline. Use when the user says "review-strict", "revisa este PR/branch estricto", "haz un review riguroso", "review this diff", "revisa mi rama antes del PR", or names a PR number to review. NOT for responding to existing reviewer comments (that is a different task).
 ---
 
 # /review-strict — strict, repo-adaptive PR reviewer
@@ -30,6 +30,8 @@ Flags:
 - `--model <sonnet|opus|haiku|inherit>` — force **all 5 lenses to one uniform model** (Phase 2 only), overriding the hybrid default and `REVIEW_STRICT_MODEL`. **Default (no flag) is a hybrid split:** the deep-reasoning lenses (**correctness, security, architecture** — where a missed bug hurts most) run on the **session model**; the mechanical lenses (**tests, migration** — checklist-style checks) run on **sonnet**. `--model sonnet` = cheapest (all lenses on Sonnet, for bulk runs); `--model inherit`/`opus` = maximum depth (all lenses on the session model). The verify pass (Phase 3) and synthesis (Phase 4) **always** use the session model regardless of this flag — the rigor gate is never lowered.
 - `--lang <en|es>` — force the report language for this run (overrides the `REVIEW_STRICT_LANG` env var). Default is **English**; set `REVIEW_STRICT_LANG=es` to make Spanish your standing default.
 
+**Host compatibility is mandatory.** Before resolving models or dispatching any agent, read `references/host-compatibility.md` and apply it. It translates the Claude-specific `Agent`/typed-agent/model wording below to Codex's available collaboration tools, concurrency, and model selectors. On Codex, unsupported Claude model names fall back to the inherited session model.
+
 **First, resolve the effective config from the environment** — read the override vars once so archive path, language and lens model are correct:
 ```bash
 # Lens model tiers (Phase 2 only). Default = HYBRID: deep lenses on the session model, mechanical on sonnet.
@@ -48,7 +50,7 @@ Read `references/repo-profile.md` and follow it to assemble a **Repo Review Prof
 1. Resolve repo root (`git rev-parse --show-toplevel`) and detect stack from `composer.json` / `package.json`.
 2. Load, with **local-wins precedence** (most specific wins). The **durable** sources present in every Cyberpuerta repo:
    - `AGENTS.md` + `CLAUDE.md` (repo root) → red lines / "Forbidden patterns", layering & architecture, exact lint/static/test commands, testing rules, migration policy, base branch.
-   - `.claude/skills/*/SKILL.md` (coding-conventions, migration-rules, repo-conventions, docker-commands) → concrete verification targets + docker exec prefix. Some repos leave these as `TODO` stubs — skip an empty one, don't treat it as a rule.
+   - `.codex/skills/*/SKILL.md` and `.claude/skills/*/SKILL.md` (coding-conventions, migration-rules, repo-conventions, docker-commands) → concrete verification targets + docker exec prefix. Some repos leave these as `TODO` stubs — skip an empty one, don't treat it as a rule.
    - **OPTIONAL / legacy — load ONLY if present, never depend on them:** any `.aiassistant/rules/*.md` (e.g. an older `pr-review-rules*.md`, `Repository Engineering Rules.md`, `Commit Review Rules.md`, `guidelines.md`). **These files are being phased out and are NOT in every repo.** If a file exists, treat it as extra signal (severity vocabulary, an output template, project-specific checks) and let it win on conflict for *format/severity*; if absent, ignore it silently. The review MUST be fully functional and rigorous without any `.aiassistant/rules` file.
 3. The skill's own bundled baseline (`references/baseline-criteria.md`) **always** applies on top — it carries the staff-level bar plus the durable Laravel/PHP and TS/Vue conventions, so a repo whose only context is `AGENTS.md`/`CLAUDE.md` still gets a rigorous review. If a repo has almost no context files, say so in the report header and lean on the baseline.
 
@@ -76,7 +78,7 @@ Never re-run full test suites here — that's expensive and out of scope for a d
 
 ## Phase 2 — Multi-lens review (fan-out)
 
-Dispatch **one sub-agent per lens, in parallel** (single message, multiple `Agent` tool calls) using this plugin's dedicated **read-only** lens agents via `subagent_type`:
+Dispatch **one sub-agent per lens with maximum host-supported parallelism**, using `references/host-compatibility.md`. On Claude, prefer the plugin's dedicated **read-only** lens agents via `subagent_type`; on Codex, read the matching bundled agent brief and spawn a general sub-agent:
 `review-strict:lens-correctness` (also runs the #4 PR-claim / AC-traceability check), `review-strict:lens-security`, `review-strict:lens-architecture`, `review-strict:lens-tests`, `review-strict:lens-migration`. Each agent is independent and adversarial — it does not see the others' findings (diversity catches what redundancy can't), and it carries its own checklist + finding contract in its agent body.
 
 **Model (hybrid by default):** dispatch the three **deep-reasoning lenses** — `review-strict:lens-correctness`, `review-strict:lens-security`, `review-strict:lens-architecture` — with `model: <DEEP_MODEL>`, and the two **mechanical lenses** — `review-strict:lens-tests`, `review-strict:lens-migration` — with `model: <MECH_MODEL>` (the values you resolved above; defaults `DEEP_MODEL=inherit`, `MECH_MODEL=sonnet`). Rationale: correctness/security/architecture are where a missed subtle bug (a false negative) is most costly, so they keep the strong session model; tests/migration are closer to checklist checks (tautological-test detection, two-phase/reversible verification) where Sonnet is enough. When a tier resolves to `inherit`, pass **no** `model` override for those lenses (use the session model). A uniform `--model <name>` collapses both tiers to `<name>`. **Never override `effort`** — inherit it.
@@ -87,7 +89,7 @@ Each lens dispatch prompt MUST include:
 - In PR mode, the **PR's self-declared risks / AC-traceability** (Phase 1 step 4) as untrusted claims to verify.
 - (The checklist + finding contract already live in each agent's body — no need to inline them.)
 
-**Fallback:** if the typed `review-strict:*` agents are unavailable (e.g. the skill is running loose, not installed as a plugin), dispatch `subagent_type: general-purpose` and inline each lens's checklist **from the agent body itself** (`agents/lens-<name>.md`) — the agent body is the single source of truth. Do NOT inline from `references/lenses.md`; that file is a non-authoritative human-readable mirror that may lag the agent.
+**Portable fallback / Codex path:** if typed `review-strict:*` agents are unavailable, use the host's general sub-agent mechanism and inline each lens's checklist **from the agent body itself** (`<plugin-root>/agents/lens-<name>.md`) — the agent body is the single source of truth. Do NOT inline from `references/lenses.md`; that file is a non-authoritative human-readable mirror that may lag the agent.
 
 The five lenses:
 1. **Correctness & requirements** — logic/arithmetic errors, inverted conditionals, contract/interface breaks, unhandled null/empty/boundary producing wrong behavior. Trace input → wrong output.

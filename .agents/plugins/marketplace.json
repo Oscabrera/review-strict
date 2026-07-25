@@ -1,0 +1,21 @@
+{
+  "name": "review-strict",
+  "interface": {
+    "displayName": "Review Strict"
+  },
+  "plugins": [
+    {
+      "name": "review-strict",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/Oscabrera/review-strict.git",
+        "ref": "main"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

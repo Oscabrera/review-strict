@@ -75,6 +75,7 @@ run_case() {
 write_payload()  { printf '{"tool_name":"Write","cwd":"%s","tool_input":{"file_path":"%s"}}' "$REPO" "$1"; }
 edit_payload()   { printf '{"tool_name":"Edit","cwd":"%s","tool_input":{"file_path":"%s"}}' "$REPO" "$1"; }
 bash_payload()   { printf '{"tool_name":"Bash","cwd":"%s","tool_input":{"command":%s}}' "$REPO" "$(printf '%s' "$1" | python3 -c 'import json,sys;print(json.dumps(sys.stdin.read()))')"; }
+patch_payload()  { printf '{"tool_name":"apply_patch","cwd":"%s","tool_input":{"command":%s}}' "$REPO" "$(printf '%s' "$1" | python3 -c 'import json,sys;print(json.dumps(sys.stdin.read()))')"; }
 
 echo "== the hook itself must parse before any assertion means anything =="
 assert_syntax_ok
@@ -123,6 +124,32 @@ run_case "tee in-repo -> deny" \
   2 "$ARCHIVE" "$(bash_payload "echo x | tee $REPO/specs/IT-1-foo/spec-review.md")"
 run_case "cp hacia ruta in-repo -> deny" \
   2 "$ARCHIVE" "$(bash_payload "cp /tmp/a.md $REPO/specs/IT-1-foo/spec-review.md")"
+
+echo
+echo "== Codex apply_patch envelope =="
+run_case "Codex Add File in-repo -> deny" \
+  2 "$ARCHIVE" "$(patch_payload '*** Begin Patch
+*** Add File: specs/IT-1-foo/spec-review.md
++body
+*** End Patch')"
+run_case "Codex Update File in-repo -> deny" \
+  2 "$ARCHIVE" "$(patch_payload '*** Begin Patch
+*** Update File: specs/IT-1-foo/spec-review-2.md
+@@
+-old
++new
+*** End Patch')"
+run_case "Codex Delete File stays allowed" \
+  0 "$ARCHIVE" "$(patch_payload '*** Begin Patch
+*** Delete File: specs/IT-1-foo/spec-review.md
+*** End Patch')"
+run_case "Codex unrelated patch stays allowed" \
+  0 "$ARCHIVE" "$(patch_payload '*** Begin Patch
+*** Update File: app/Services/FooService.php
+@@
+-old
++new
+*** End Patch')"
 
 echo
 echo "== deletions and reads MUST keep working (the cleanup depends on it) =="
