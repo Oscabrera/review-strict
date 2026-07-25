@@ -48,7 +48,9 @@ aplica sus ediciones al spec, y deja que Forge implemente un spec ya endurecido.
 
 ## Salida
 
-Un `spec-review.md` (junto al spec por defecto) con un **veredicto de readiness**
+Una review archivada en `$REVIEW_STRICT_ARCHIVE_DIR/<repo>/spec-reviews/<spec-slug>.md` cuando esa
+variable está definida (el caso de carpeta central de notas), si no `spec-review.md` junto al spec;
+`--out <dir>` gana sobre ambos. Trae un **veredicto de readiness**
 (`ready` / `revise-before-Forge`), findings agrupados por lente (severidad: **block** / **should-fix**
 / **nice-to-have**), cada uno redactado como la edición exacta a aplicar al spec, más una nota de cobertura.
 
