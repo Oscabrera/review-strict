@@ -1,6 +1,7 @@
 # Changelog
 
 ## 1.3.0
+- **Codex compatibility.** Added `.codex-plugin/plugin.json`, a Git-backed repo marketplace at `.agents/plugins/marketplace.json`, and `hooks/hooks.json`. The three existing skills remain shared with Claude Code and now load a host adapter that maps typed Claude agents/model selectors to Codex sub-agents, concurrency, and inherited models. The archive guard also recognizes Codex's canonical `apply_patch` envelope.
 - **New — a `PreToolUse` hook that mechanically blocks the in-repo review write.** The Phase-0/Phase-5 fix below is an *instruction*; this is the *enforcement*, because an instruction is exactly what failed. `hooks/block-inrepo-spec-review.sh` denies any write whose target basename matches `spec-review*.md` **when `REVIEW_STRICT_ARCHIVE_DIR` is set** — the situation in which an in-repo write is definitionally a regression.
   - **No-op when the env var is unset**, so the documented portable default (`<spec-dir>/spec-review.md`) keeps working for every developer who has not configured a central archive. The guard corrects a misconfiguration; it does not impose one.
   - **Basename matching is the mechanism.** The two precedence branches use different filenames — the archive writes `<spec-slug>.md`, only the fallback writes `spec-review.md` — so the guard still fires when the directory is an unresolvable shell variable (`cat > "$OUT_DIR/spec-review.md"`).

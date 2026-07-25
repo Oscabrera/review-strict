@@ -1,0 +1,17 @@
+{
+  "description": "Prevent spec-strict reports from falling back into a reviewed repository when a central archive is configured.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/block-inrepo-spec-review.sh",
+            "statusMessage": "Checking review-strict archive target"
+          }
+        ]
+      }
+    ]
+  }
+}
