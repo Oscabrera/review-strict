@@ -2,7 +2,9 @@
 
 # /review-strict — resumen
 
-Revisor de PR/branch/diff **estricto y adaptativo al repo**. Skill de Claude Code: se adapta al repo donde lo corras (lee sus reglas reales) y produce un review riguroso, multi-agente y verificado adversarialmente.
+Revisor de PR/branch/diff **estricto y adaptativo al repo** para Claude Code y Codex: se adapta al repo donde lo corras (lee sus reglas reales) y produce un review riguroso, multi-agente y verificado adversarialmente.
+
+En Codex, invoca `$review-strict`. Codex hereda el modelo de sesión salvo que el host actual soporte explícitamente el selector solicitado.
 
 Parte de la familia de análisis: **`/spec-strict`** (el plan) → **`/review-strict`** (el cambio) → **`/audit-strict`** (el repo).
 

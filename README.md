@@ -2,7 +2,7 @@
 
 # review-strict
 
-A **strict, repo-adaptive PR / branch / diff reviewer** for Claude Code. It runs a
+A **strict, repo-adaptive PR / branch / diff reviewer** for Claude Code **and Codex**. It runs a
 multi-agent, adversarially-verified code review at staff-engineer rigor
 (correctness, security, architecture, tests, migration safety), adapts to each
 repository's own rules, and archives a project-named report. It is independent of
@@ -20,6 +20,8 @@ Together: **`/spec-strict` reviews the plan → `/review-strict` reviews the cha
 
 This is a **public, self-contained** repo (it is both the plugin and its own marketplace):
 
+### Claude Code
+
 ```
 /plugin marketplace add Oscabrera/review-strict
 /plugin install review-strict
@@ -27,9 +29,22 @@ This is a **public, self-contained** repo (it is both the plugin and its own mar
 
 Then invoke `/spec-strict`, `/review-strict` or `/audit-strict` in any repo.
 
+### Codex
+
+```bash
+codex plugin marketplace add Oscabrera/review-strict --ref main
+codex plugin add review-strict@review-strict
+```
+
+Start a new thread, then invoke `$spec-strict`, `$review-strict`, or `$audit-strict` (plain-language requests using those names work too). The bundled archive guard is a lifecycle hook; review and trust it with `/hooks` before expecting enforcement.
+
+The same `skills/` directory is shared by both hosts. Codex uses the portable host adapter to run the bundled agent briefs through its own sub-agent mechanism and inherits the session model when a Claude-only model selector is not available.
+
 ## Updating
 
-Installed plugins do **not** update on their own by default — you pull new versions explicitly:
+Installed plugins do **not** update on their own by default — you pull new versions explicitly.
+
+Claude Code:
 
 ```
 /plugin marketplace update review-strict     # fetch the latest published version
@@ -48,10 +63,17 @@ To update automatically at session start, opt in **per user** in `~/.claude/sett
 }
 ```
 
+Codex:
+
+```bash
+codex plugin marketplace upgrade review-strict
+codex plugin add review-strict@review-strict
+```
+
+Start a new thread after reinstalling so Codex loads the updated skills and hooks.
+
 Releases are **version-gated**: consumers only move when the `version` in
-`.claude-plugin/marketplace.json` is bumped (see `CHANGELOG.md`) — intermediate commits to
-`main` are not pushed to anyone. Bumping `version` + updating `CHANGELOG.md` on a merge to
-`main` is what cuts a release.
+`.claude-plugin/marketplace.json` and `.codex-plugin/plugin.json` is bumped (see `CHANGELOG.md`) — intermediate commits to `main` are not pushed to anyone. Bumping both versions + updating `CHANGELOG.md` on a merge to `main` is what cuts a release.
 
 ## Usage
 
@@ -127,7 +149,7 @@ Reports are review **output**, not source — the in-repo `reviews/` folder is a
 
 ## How it works
 
-1. **Profile the repo** — reads `AGENTS.md`, `CLAUDE.md`, `.claude/skills/*` (and legacy `.aiassistant/rules/*` only if present), local-wins.
+1. **Profile the repo** — reads `AGENTS.md`, `CLAUDE.md`, `.codex/skills/*`, `.claude/skills/*` (and legacy `.aiassistant/rules/*` only if present), local-wins.
 2. **Diff + toolchain** — pulls the diff, excludes noise (`specs/`, `vendor/`, lockfiles), captures lint/static-analysis best-effort (evidence/CI if available; never blocks).
 3. **Five adversarial lenses** in parallel — correctness/requirements, security, architecture & reuse, tests, migration safety. No-op agents are retried.
 4. **Adversarial verification** — a skeptic pass refutes each finding against the diff; only evidenced findings survive.
