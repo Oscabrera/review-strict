@@ -91,7 +91,7 @@ Ver `skills/audit-strict/README.md` para la referencia completa de `/audit-stric
 
 | Variable | Default | Efecto |
 |---|---|---|
-| `REVIEW_STRICT_ARCHIVE_DIR` | *(sin definir)* | Si se define, los reportes se archivan en `$REVIEW_STRICT_ARCHIVE_DIR/<repo>/<archivo>`. Si no, se archivan **dentro del repo revisado** en `reviews/<proyecto>-pr-<N>.md` (portable — todos lo tienen). |
+| `REVIEW_STRICT_ARCHIVE_DIR` | *(sin definir)* | Base de archivo compartida por los tres skills. Si se define: `/review-strict` → `$DIR/<repo>/<archivo>`, `/spec-strict` → `$DIR/<repo>/spec-reviews/<spec-slug>.md`, `/audit-strict` → `$DIR/audit-strict/<repo>/`. Si no, cada uno archiva **dentro del repo revisado** (`reviews/<proyecto>-pr-<N>.md`, `<spec-dir>/spec-review.md`, `audit-strict/`) — portable, todos lo tienen. |
 | `REVIEW_STRICT_LANG` | `en` | Idioma del reporte: `en` o `es`. El flag `--lang <en|es>` lo sobreescribe por corrida. |
 | `REVIEW_STRICT_MODEL` | *(híbrido)* | Fuerza las 5 lentes de `/review-strict` a un modelo uniforme (`sonnet`/`opus`/`haiku`/`inherit`); `--model` lo sobreescribe. **Sin definir = híbrido** (el default): lentes profundas (corrección, seguridad, arquitectura) en el modelo de sesión, mecánicas (tests, migración) en Sonnet. **La palanca principal de costo.** |
 | `SPEC_STRICT_MODEL` | *(híbrido)* | Igual para las 6 lentes de `/spec-strict` — híbrido: coverage/risk/architecture/scope en el modelo de sesión, ac-quality/verification en Sonnet. |

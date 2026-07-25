@@ -94,6 +94,8 @@ Rules for the report:
 
 ## Save-path resolution (Phase 5)
 
+> Applies to `/review-strict`. The sibling skills share the same `REVIEW_STRICT_ARCHIVE_DIR` base but own their sub-path and filename — `/spec-strict` → `$DIR/<repo>/spec-reviews/<spec-slug>.md`, `/audit-strict` → `$DIR/audit-strict/<repo>/`. Follow each skill's own Phase 5, not this one.
+
 **Primary (always, unless `--no-save`) — portable archive:**
 
 - **Default (portable — works for any developer):** inside the reviewed repo → `<repo-root>/reviews/<file>`.

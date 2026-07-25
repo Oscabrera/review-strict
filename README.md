@@ -92,7 +92,7 @@ See `skills/audit-strict/README.md` for the full `/audit-strict` reference.
 
 | Variable | Default | Effect |
 |---|---|---|
-| `REVIEW_STRICT_ARCHIVE_DIR` | *(unset)* | When set, reports archive to `$REVIEW_STRICT_ARCHIVE_DIR/<repo>/<file>`. When unset, they archive **inside the reviewed repo** at `reviews/<project>-pr-<N>.md` (portable — everyone has it). |
+| `REVIEW_STRICT_ARCHIVE_DIR` | *(unset)* | Shared archive base for all three skills. When set: `/review-strict` → `$DIR/<repo>/<file>`, `/spec-strict` → `$DIR/<repo>/spec-reviews/<spec-slug>.md`, `/audit-strict` → `$DIR/audit-strict/<repo>/`. When unset, each archives **inside the reviewed repo** (`reviews/<project>-pr-<N>.md`, `<spec-dir>/spec-review.md`, `audit-strict/`) — portable, everyone has it. |
 | `REVIEW_STRICT_LANG` | `en` | Report language: `en` or `es`. The `--lang <en|es>` flag overrides it per run. |
 | `REVIEW_STRICT_MODEL` | *(hybrid)* | Forces `/review-strict`'s 5 lenses to one uniform model (`sonnet`/`opus`/`haiku`/`inherit`); `--model` overrides it. **Unset = hybrid** (the default): deep lenses (correctness, security, architecture) on the session model, mechanical (tests, migration) on Sonnet. **The main cost lever.** |
 | `SPEC_STRICT_MODEL` | *(hybrid)* | Same for `/spec-strict`'s 6 lenses — hybrid: coverage/risk/architecture/scope on the session model, ac-quality/verification on Sonnet. |
