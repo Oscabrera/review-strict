@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.1
+- **Fix — `/spec-strict` ignored `REVIEW_STRICT_ARCHIVE_DIR` and wrote reviews into the reviewed repo.** Its Phase 5 was the only one of the three skills that described the save path in **prose** ("`--out` → else `$REVIEW_STRICT_ARCHIVE_DIR/…` if set → else next to the spec") with no bash resolution, while `/review-strict` (if/else + heredoc) and `/audit-strict` (`BASE`/`OUT_DIR` + `printf out=%s`) resolve it executably. The Phase-0 config block printed `archive=` but never bound an `OUT_DIR`, and the announce line omitted the output location — so nothing forced the resolution and runs silently fell through to the `<spec-dir>/spec-review.md` fallback, landing (and getting committed) inside feature repos instead of the configured archive.
+  - Phase 0 now resolves `OUT_DIR` in the same block as language and models (`--out` → `$REVIEW_STRICT_ARCHIVE_DIR/<repo>/spec-reviews` → in-spec-dir), treats an empty env var as unset, and the announce line must state the resolved output location. Phase 5 consumes `$OUT_DIR` instead of re-deciding it.
+  - Phase 5 gained the explicit quoted-heredoc write block (literal `$`/backticks, no cross-repo edit-guard when the archive is outside the repo), the `<spec-slug>.md` archive filename, `-<n>` suffixing so a re-run never silently overwrites a prior verdict, and a requirement to print which precedence branch produced the path — a misconfigured env var is now visible instead of silent.
+  - In the in-spec-dir fallback only, the skill now flags `specs/*/spec-review.md` as review **output** worth gitignoring (it never commits it).
+- Docs: spec-strict READMEs (en+es) and the `--out` flag no longer advertise "next to the spec" as the default when an archive dir is configured; the root config table documents the shared `REVIEW_STRICT_ARCHIVE_DIR` sub-path for all three skills; `severity-output.md`'s save-path section is now explicitly scoped to `/review-strict` so siblings don't inherit its `reviews/` layout.
+
 ## 1.2.0
 - **Cost lever — hybrid per-lens model.** `/review-strict` (5 lenses) and `/spec-strict` (6 lenses) now split their fan-out across model tiers instead of putting every lens on the session model:
   - **Deep-reasoning lenses run on the session model** (review: correctness, security, architecture; spec: coverage, risk, architecture, scope) — these are where a missed subtle bug (a **false negative**) is most costly, so they keep the strong model.
