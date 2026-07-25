@@ -48,7 +48,9 @@ apply its spec edits, then let Forge implement a hardened spec.
 
 ## Output
 
-A `spec-review.md` (written next to the spec by default) with a **readiness verdict**
+A spec review archived to `$REVIEW_STRICT_ARCHIVE_DIR/<repo>/spec-reviews/<spec-slug>.md` when that
+env var is set (the central-notes case), else `spec-review.md` next to the spec; `--out <dir>` overrides
+both. It carries a **readiness verdict**
 (`ready` / `revise-before-Forge`), findings grouped by lens (severity: **block** / **should-fix**
 / **nice-to-have**), each phrased as the exact edit to apply to the spec, plus a coverage note.
 

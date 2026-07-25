@@ -17,20 +17,26 @@ Two sources of truth, in order (same as review-strict): (1) the **repo's own rul
 - `/spec-strict <path>` → review that explicit spec dir.
 - `/spec-strict IT-XXXXX` → resolve `specs/IT-XXXXX-*/` on the current branch.
 
-Flags: `--base <branch>` (override base for detection) · `--fast` (single-agent, you walk all six lenses yourself) · `--model <sonnet|opus|haiku|inherit>` (force **all 6 lenses to one uniform model** in Phase 2, overriding the hybrid default and `SPEC_STRICT_MODEL`; `--model sonnet` = cheapest, `--model inherit`/`opus` = maximum depth; the verify pass + synthesis always use the session model) · `--lang <en|es>` (report language; overrides `REVIEW_STRICT_LANG`, default `en`) · `--out <dir>` (where to write the review; default: next to the spec as `<spec-dir>/spec-review.md`) · `--no-save` (print the review in chat only; write nothing).
+Flags: `--base <branch>` (override base for detection) · `--fast` (single-agent, you walk all six lenses yourself) · `--model <sonnet|opus|haiku|inherit>` (force **all 6 lenses to one uniform model** in Phase 2, overriding the hybrid default and `SPEC_STRICT_MODEL`; `--model sonnet` = cheapest, `--model inherit`/`opus` = maximum depth; the verify pass + synthesis always use the session model) · `--lang <en|es>` (report language; overrides `REVIEW_STRICT_LANG`, default `en`) · `--out <dir>` (where to write the review; default: `$REVIEW_STRICT_ARCHIVE_DIR/<repo>/spec-reviews/` when that env var is set, else next to the spec as `<spec-dir>/spec-review.md`) · `--no-save` (print the review in chat only; write nothing).
 
 **Default lens model is a hybrid split:** the deep-reasoning lenses (**coverage, risk, architecture, scope**) run on the **session model**; the mechanical lenses (**ac-quality, verification** — filler-table / wrong-stack-command checks) run on **sonnet**.
 
-**Resolve config first:**
+**Resolve config first** — output dir, language and model, in ONE block, so the save path is bound to a variable before any lens runs (never left to prose at Phase 5):
 ```bash
+REPO="$(basename "$(git rev-parse --show-toplevel)")"
+LANG_EFF="${REVIEW_STRICT_LANG:-en}"
+# OUT_DIR precedence: --out <dir>  →  $REVIEW_STRICT_ARCHIVE_DIR/<repo>/spec-reviews  →  in-spec-dir.
+# The env-var branch is the DEFAULT on any machine that sets it — the in-spec-dir case is the last resort.
+if   [ -n "${OUT_FLAG:-}" ];                  then OUT_DIR="$OUT_FLAG"
+elif [ -n "${REVIEW_STRICT_ARCHIVE_DIR:-}" ]; then OUT_DIR="$REVIEW_STRICT_ARCHIVE_DIR/$REPO/spec-reviews"
+else                                               OUT_DIR="<spec-dir>"; fi
 # Lens model tiers (Phase 2 only). Default = HYBRID: deep lenses on the session model, mechanical on sonnet.
 # --model / $SPEC_STRICT_MODEL force a single UNIFORM model for ALL lenses.
 UNIFORM="${MODEL_FLAG:-${SPEC_STRICT_MODEL:-}}"
 if [ -n "$UNIFORM" ]; then DEEP_MODEL="$UNIFORM"; MECH_MODEL="$UNIFORM"; else DEEP_MODEL="inherit"; MECH_MODEL="sonnet"; fi
-printf 'lang=%s archive=%s deep_lenses=%s mech_lenses=%s\n' "${REVIEW_STRICT_LANG:-en}" \
-  "${REVIEW_STRICT_ARCHIVE_DIR:-<in-spec-dir>}" "$DEEP_MODEL" "$MECH_MODEL"
+printf 'out=%s lang=%s deep_lenses=%s mech_lenses=%s\n' "$OUT_DIR" "$LANG_EFF" "$DEEP_MODEL" "$MECH_MODEL"
 ```
-(`DEEP_MODEL=inherit` means "no override → session model".) Precedence — **lens model:** `--model <name>` / `$SPEC_STRICT_MODEL` force a uniform model for all lenses; unset → **hybrid** (deep=session, mechanical=sonnet). Then announce the resolved mode in one line, including the split (e.g. "Revisando spec `specs/IT-52986-…/` en cp-shops-catalog, multi-agente (deep: sesión + mech: sonnet + verify: sesión), es").
+(`DEEP_MODEL=inherit` means "no override → session model".) Precedence — **out dir:** `--out <dir>` → `$REVIEW_STRICT_ARCHIVE_DIR/<repo>/spec-reviews/` → in-spec-dir. **lens model:** `--model <name>` / `$SPEC_STRICT_MODEL` force a uniform model for all lenses; unset → **hybrid** (deep=session, mechanical=sonnet). Then announce the resolved mode in one line, **including the resolved output location** (e.g. "Revisando spec `specs/IT-52986-…/` en cp-shops-catalog, multi-agente (deep: sesión + mech: sonnet + verify: sesión), es, salida a `brain/review-strict/cp-shops-catalog/spec-reviews/`"). Carry `$OUT_DIR` through to Phase 5 — do not re-derive it there.
 
 ## Phase 0 — Repo profile + spec-dir detection
 
@@ -79,7 +85,18 @@ Errors only — no praise, no restating the spec. A clean spec yields an honest 
 ## Phase 5 — Deliver
 
 - Print the review in chat.
-- Write it (unless `--no-save`) to `--out` → else `$REVIEW_STRICT_ARCHIVE_DIR/<repo>/spec-reviews/<spec-slug>.md` if that env var is set → else **next to the spec**: `<spec-dir>/spec-review.md`. Use a Bash quoted heredoc (literal `$`/backticks). `mkdir -p` as needed; print the path.
+- **Always archive** it (unless `--no-save`) to the `$OUT_DIR` **already resolved in "Resolve config first"** — do not re-decide the location here, and never default to the spec dir when `$REVIEW_STRICT_ARCHIVE_DIR` is set. **Filename:** in the archive → `<spec-slug>.md` (the spec dir's basename, e.g. `IT-52986-chore-make-feature-suite-runnable.md`); in the in-spec-dir fallback → `spec-review.md`. Re-runs on the same spec → append `-<n>` to the stem (`IT-52986-….md` → `IT-52986-…-2.md`); check for existing files and increment, so a second pass never silently overwrites the first verdict.
+
+  **Write the file with Bash (a quoted heredoc), NOT the Write/Edit tool** — so the review's `$`, backticks and `!` land literally, and no cross-repo edit-guard fires when `$OUT_DIR` points outside the repo:
+  ```bash
+  mkdir -p "$OUT_DIR"
+  cat > "$OUT_DIR/<file>" <<'SPEC_STRICT_EOF'
+  <full review markdown here — verbatim, no escaping needed>
+  SPEC_STRICT_EOF
+  echo "archivado: $OUT_DIR/<file>"
+  ```
+  The `'SPEC_STRICT_EOF'` delimiter MUST be single-quoted; pick a sentinel that cannot appear in the review body. Print the exact path after writing, and state which branch of the precedence produced it (`--out` / archive dir / in-spec-dir fallback) so a misconfigured env var is visible instead of silent.
+- **Only in the in-spec-dir fallback:** the review is spec **output**, not spec source — if the repo tracks it, mention adding `specs/*/spec-review.md` to `.gitignore`; the developer decides whether to commit review history. Never commit it yourself.
 - **NEVER edit `spec.md` / `plan.json` / `pr.md` / `validation.md`.** This skill reviews only; the human or Axiom applies the edits. It does not commit, branch, or open PRs.
 
 ## Operating rules (always)
