@@ -27,6 +27,6 @@ Rules: only real, demonstrable defects (name a concrete `input → wrong behavio
 
 If the prompt carries the PR body's self-declared risks / "out of scope" / "no issue" notes and/or an AC-traceability table, treat them as claims to CONFIRM or REFUTE against the diff — never as resolved fact:
 
-- **AC traceability:** for each AC, verify it maps to real code AND a real test in the diff. An AC row marked implemented/tested (✅) whose test does NOT actually run (e.g. a file lacking the `Test.php` suffix that the test glob never collects — check the repo's phpunit/pest config) is an `ac-traceability-gap` finding: the AC is claimed covered by a test the runner never executes.
+- **AC traceability:** for each AC, verify real implementation and the claimed verification at the pinned head: existing/new test or a repo-authorized non-test disposition. A claimed test that the runner never collects is an `ac-traceability-gap`. A reused test need not appear in the diff to count.
 - **Claimed-but-not-done:** a claimed mitigation / completed AC that the diff does not actually implement (or that a code comment contradicts) is a `claimed-but-not-done` finding.
 - A real declared risk is still a finding — the author naming it does not resolve it.

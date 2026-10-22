@@ -1,6 +1,6 @@
 # Always-on staff baseline — the reviewer's own criterion
 
-This is the independent standard `/review-strict` applies **on top of** whatever the repo declares — the "separate criterion" that keeps the review rigorous even when a repo's rules are thin or missing. These dimensions are review-blocking when violated in the current diff; they are never deferred as "later". Findings raised here are labeled as baseline findings and reported even if the repo's own checklist didn't ask for them.
+This is the independent standard `/review-strict` applies **on top of** whatever the repo declares — the "separate criterion" that keeps the review rigorous even when a repo's rules are thin or missing. These dimensions contribute findings; the repo's canonical disposition policy decides whether they block. Without such a policy, demonstrated behavior regressions and mandatory contract violations require changes; preferences and hypothetical hardening remain advisory. Findings raised here are labeled as baseline findings and reported even if the repo's own checklist didn't ask for them. Do not inflate impact severity merely to express a blocking disposition.
 
 ## The six baseline dimensions
 

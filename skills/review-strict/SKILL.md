@@ -43,36 +43,41 @@ printf 'archive_dir=%s lang=%s deep_lenses=%s mech_lenses=%s\n' \
 ```
 (`DEEP_MODEL=inherit` means "no override → session model".) Precedence — **lens model:** `--model <name>` / `$REVIEW_STRICT_MODEL` force a uniform model for all lenses; unset → **hybrid** (deep=session, mechanical=sonnet). **Language:** `--lang <en|es>` → `$REVIEW_STRICT_LANG` → `en`. The resolved values drive Phase 2 (lens dispatch), Phase 5 (archive) and the report language. Then announce the resolved mode in one line, **including the lens split, archive location and language** (e.g. "Reviewing PR #241 on cp-shops-catalog vs `development`, multi-agent (deep: sesión + mech: sonnet + verify: sesión), en, archiving to `<repo>/reviews/…`").
 
+Read `references/review-integrity.md` before gathering evidence. Its pinned-source,
+completion, and disposition rules govern Phases 0–5, including `--fast` mode.
+
 ## Phase 0 — Build the Repo Review Profile (the adaptive core)
 
 Read `references/repo-profile.md` and follow it to assemble a **Repo Review Profile**. In short:
 
 1. Resolve repo root (`git rev-parse --show-toplevel`) and detect stack from `composer.json` / `package.json`.
-2. Load, with **local-wins precedence** (most specific wins). The **durable** sources present in every Cyberpuerta repo:
+2. Load under the repo's **declared canonical ownership and path scopes**, as defined in `references/repo-profile.md`:
    - `AGENTS.md` + `CLAUDE.md` (repo root) → red lines / "Forbidden patterns", layering & architecture, exact lint/static/test commands, testing rules, migration policy, base branch.
+   - Applicable `.claude/rules/*.md`, `.codex/rules/*.md`, and nested `AGENTS.md` files → scoped conventions. Canonical repo contracts → severity, disposition, and review obligations; for Stratos follow `references/stratos-contracts.md`.
    - `.codex/skills/*/SKILL.md` and `.claude/skills/*/SKILL.md` (coding-conventions, migration-rules, repo-conventions, docker-commands) → concrete verification targets + docker exec prefix. Some repos leave these as `TODO` stubs — skip an empty one, don't treat it as a rule.
-   - **OPTIONAL / legacy — load ONLY if present, never depend on them:** any `.aiassistant/rules/*.md` (e.g. an older `pr-review-rules*.md`, `Repository Engineering Rules.md`, `Commit Review Rules.md`, `guidelines.md`). **These files are being phased out and are NOT in every repo.** If a file exists, treat it as extra signal (severity vocabulary, an output template, project-specific checks) and let it win on conflict for *format/severity*; if absent, ignore it silently. The review MUST be fully functional and rigorous without any `.aiassistant/rules` file.
+   - **OPTIONAL / legacy — load ONLY if present, never depend on them:** any `.aiassistant/rules/*.md` (e.g. an older `pr-review-rules*.md`, `Repository Engineering Rules.md`, `Commit Review Rules.md`, `guidelines.md`). **These files are being phased out and are NOT in every repo.** If a file exists, treat it as extra signal (severity vocabulary, an output template, project-specific checks) without overriding a current canonical contract; if absent, ignore it silently. The review MUST be fully functional and rigorous without any `.aiassistant/rules` file.
 3. The skill's own bundled baseline (`references/baseline-criteria.md`) **always** applies on top — it carries the staff-level bar plus the durable Laravel/PHP and TS/Vue conventions, so a repo whose only context is `AGENTS.md`/`CLAUDE.md` still gets a rigorous review. If a repo has almost no context files, say so in the report header and lean on the baseline.
 
 Hold the profile in memory — you inject its relevant parts into every sub-agent prompt below. **Never review from generic memory of "how Laravel should look"** when the repo has stated its own rules.
 
 ## Phase 1 — Diff context + toolchain evidence
 
-1. Get the diff and changed-file list:
-   - Branch mode: `git diff --merge-base <base>...HEAD` and `git diff --merge-base <base>...HEAD --name-only`.
-   - PR mode: `gh pr diff <PR#>` and `gh pr diff <PR#> --name-only`; also `gh pr view <PR#> --json title,body,headRefName,baseRefName`.
+1. Freeze the review subject and read its exact source using `references/review-integrity.md`.
+   - Branch/range mode: use `scripts/review-context.py diff --base <base> --head <head>`; keep its full base/head/merge-base SHAs and changed files.
+   - PR mode: capture `headRefOid`/`baseRefOid`, resolve those objects, then use the same helper with the literal SHAs. Build the patch from the pinned commits, not a later `gh pr diff`.
+   - Rebuild the Phase-0 profile from the pinned head. Give every lens and the skeptic the same subject identity and pinned source excerpts; ordinary reads of another checkout are not evidence.
 
-2. **Scope out noise before reviewing.** Split the changed-file list into *reviewable code* vs *committed/generated artifacts*, and review only the code. Exclude by default: `specs/**`, `**/evidence/**`, `vendor/**`, `node_modules/**`, `dist/**`, `build/**`, lockfiles (`composer.lock`, `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`), and other clearly-generated/committed-artifact paths. State the excluded set in one line in the report (e.g. "Excluí del review: `specs/IT-…/` (artefactos del pipeline), `composer.lock`"). Do not let artifacts inflate the diff or the lens prompts.
+2. **Separate source from bulky artifacts.** Keep governing spec/design/contract/decision changes in scope, along with runtime-read distributed assets such as agent bodies, templates, and hooks. Read unchanged spec documents as requirements context. Exclude bulky generated evidence, vendor/build output, and lockfiles by default only when they do not determine the behavior being reviewed; inspect relevant lockfile changes for dependency/security work. Excluding an evidence patch from prompts does not authorize deleting it or ignoring a change to the claimed evidence. State exclusions and their reason.
 
 3. **Build checks — best-effort, NON-BLOCKING, not the reviewer's gate.** Lint + static analysis (Pint / PHPStan and equivalents) are **already run by CI on the PR**, so `/review-strict` does NOT need to be their gate and must NOT do anything invasive (no `gh pr checkout`, no branch switch, no worktree) just to run them. In order of preference:
    - **(a) Read evidence if present** — a lint/static-analysis cache or result in the PR/spec dir (e.g. `verify-result-cache-*.json`), or CI check-runs (`gh api .../check-runs`). Summarize it. **Complexity tooling:** if the repo runs PHPMD/PHP Insights in CI (uncommon here), read that output and pass the numbers to the architecture lens; otherwise the lens estimates complexity from the diff itself (its default path — do not treat "no PHPMD" as skipping the complexity check).
-   - **(b) Run trivially if already possible** — if the tools run against the current checkout without a branch switch (e.g. the container is up and the wrapper is incremental), run them best-effort and summarize.
-   - **(c) Otherwise skip and say so** — record "Pint/PHPStan: not run (CI corroborates)" in Build Checks. **This is fine** — no evidence is not a blocker; just review the five lenses. Never fabricate a result, never block on a missing build check.
+   - **(b) Run trivially if already possible** — if the tools run against the pinned subject without a branch switch (e.g. the container is up and the wrapper is incremental), run them best-effort and summarize.
+   - **(c) Otherwise skip and say so** — record "Pint/PHPStan: not run — no verified evidence" in Build Checks; say CI corroborates only after checking results for the frozen head. **This is fine** — no evidence is not a blocker; just review the five lenses. Never fabricate a result, never block on a missing build check.
 
 4. **Capture the PR's self-declarations (PR mode) as CLAIMS TO VERIFY, not as truth.** From `gh pr view --json body`, extract any `Reviewer Attention`, `Risks`, `Risks and Follow-ups`, `Rollback`, and `Acceptance Criteria` / `AC traceability` sections. Pass them into the lens prompts (Phase 2) explicitly labeled as **untrusted author claims**. The reviewer's job is to independently confirm or refute each:
    - A declared risk that is **real** is still a finding (the author naming it does not resolve it).
    - A claimed mitigation / "no issue" / "out of scope" that the diff does **not** actually implement is a finding (`claimed-but-not-done`).
-   - If the PR carries an **AC traceability table**, verify each AC row maps to real code AND a real test in the diff; a row marked ✅/tested with no corresponding assertion is a finding (`ac-traceability-gap`). This is a Pass-1-style check folded into the correctness + tests lenses.
+   - If the PR carries an **AC traceability table**, verify each AC row maps to real code and its claimed verification (existing/new test or repo-authorized non-test disposition) at the frozen head; a row marked ✅/tested with no corresponding assertion is a finding (`ac-traceability-gap`). This is a Pass-1-style check folded into the correctness + tests lenses.
 
 Never re-run full test suites here — that's expensive and out of scope for a diff review. If test coverage looks insufficient, that becomes a *finding* (Phase 2 tests lens), not a suite run.
 
@@ -84,8 +89,8 @@ Dispatch **one sub-agent per lens with maximum host-supported parallelism**, usi
 **Model (hybrid by default):** dispatch the three **deep-reasoning lenses** — `review-strict:lens-correctness`, `review-strict:lens-security`, `review-strict:lens-architecture` — with `model: <DEEP_MODEL>`, and the two **mechanical lenses** — `review-strict:lens-tests`, `review-strict:lens-migration` — with `model: <MECH_MODEL>` (the values you resolved above; defaults `DEEP_MODEL=inherit`, `MECH_MODEL=sonnet`). Rationale: correctness/security/architecture are where a missed subtle bug (a false negative) is most costly, so they keep the strong session model; tests/migration are closer to checklist checks (tautological-test detection, two-phase/reversible verification) where Sonnet is enough. When a tier resolves to `inherit`, pass **no** `model` override for those lenses (use the session model). A uniform `--model <name>` collapses both tiers to `<name>`. **Never override `effort`** — inherit it.
 
 Each lens dispatch prompt MUST include:
-- The **path to the diff** to review + the changed-file list (minus the noise excluded in Phase 1). For a large diff, scope each agent to the files relevant to its lens but give it the full file list for context.
-- The relevant **Repo Review Profile** slice + the **always-on baseline** slice (`references/baseline-criteria.md`) for that lens.
+- The **path to the pinned diff**, full subject SHAs, pinned source excerpts, and changed-file list (minus justified exclusions in Phase 1). For a large diff, scope each agent to the files relevant to its lens but give it the full file list for context.
+- The relevant **Repo Review Profile**, canonical obligations and disposition policy + the **always-on baseline** slice (`references/baseline-criteria.md`) for that lens.
 - In PR mode, the **PR's self-declared risks / AC-traceability** (Phase 1 step 4) as untrusted claims to verify.
 - (The checklist + finding contract already live in each agent's body — no need to inline them.)
 
@@ -114,10 +119,11 @@ A finding survives only if the skeptic can point at the exact evidence. This is 
 ## Phase 4 — Synthesize & score
 
 1. Map severities into the **repo's vocabulary** (e.g. Blocker / Major / Minor) using the crosswalk in `references/severity-output.md`. Internally you reason in P0/P1/P2; you *report* in the repo's terms.
-2. Order findings most-severe first. Compute the header fields the repo's output policy requires (e.g. "Estimated effort to review: N/10", "Recommended focus areas").
-3. Render the report in the **repo's suggested output template** if it defines one; otherwise use the default in `references/severity-output.md`. Always include: Build Checks results (Phase 1), findings with `Why` + `Fix` + evidence anchor, and a final decision (`approve` / `request-changes` / `comment`).
-4. **Apply the "Brevity & readability" rules in `references/severity-output.md`** — lead with the decision + ≤5-bullet TL;DR, one line per finding, evidence hunk only for Blocker/Major, hedge once. Brief in form, evidence intact.
-4. State the final decision honestly: any surviving Blocker/P0 → `request-changes`.
+2. Order findings most-severe first. Assign `blocking: true|false` and its disposition reason independently of severity under the repo's policy (fallback: `references/baseline-criteria.md`). Compute the header fields the repo's output policy requires (e.g. "Estimated effort to review: N/10", "Recommended focus areas").
+3. Apply the completion ledger and currency check in `references/review-integrity.md`. A missing applicable lens, required contract, or unverified/stale subject cannot yield approval; use `incomplete` when no known blocker already requires changes.
+4. Render the report in the **repo's suggested output template** if it defines one; otherwise use the default in `references/severity-output.md`. Always include: Build Checks results (Phase 1), findings with `Why` + `Fix` + evidence anchor, and a final decision (`approve` / `request-changes` / `comment` / `incomplete`), full reviewed base/head SHAs, and coverage/currency status.
+5. **Apply the "Brevity & readability" rules in `references/severity-output.md`** — lead with the decision + ≤5-bullet TL;DR, one line per finding, evidence hunk only for Blocker/Major, hedge once. Brief in form, evidence intact.
+6. State the final decision under the repo's blocking/disposition policy. A known blocker requires changes; otherwise incomplete coverage requires `incomplete`.
 
 ## Phase 5 — Deliver
 
@@ -144,11 +150,11 @@ A finding survives only if the skeptic can point at the exact evidence. This is 
   ```
   The `'REVIEW_STRICT_EOF'` delimiter MUST be single-quoted; pick a sentinel that cannot appear in the report body.
 - If `--repo-copy`: also write the same report to the repo's own declared convention path from the profile (`.ai/pr-reviews/<file>`, `.ai-abstracts/pr-reviews/<file>`) as a secondary copy. Skip silently if the repo declares no such path. (Usually redundant now that the default already writes in-repo — keep it for repos that mandate a specific reviews path.)
-- If `--post`: compose the comment **in English** (hard rule — outward-facing comments are always English, even when the report is Spanish). Map the decision to the GitHub review event:
-  - any surviving **Blocker/P0 → `gh pr review <PR#> --request-changes -F <file>`**;
-  - findings but no blocker → **`--comment -F <file>`**;
-  - **`--approve`** only if the review is genuinely clean (zero findings) AND the user explicitly asked to approve — since `/review-strict` is errors-only, `--comment` is the normal event.
-  Post ONE review carrying the body you generated (translated to English). **Never invent comments or inline threads that don't exist** — only attach an inline comment when you have a real `file:line` from a finding; otherwise keep it a single top-level review body. Show the composed comment and **confirm with the user before posting** — never post without explicit go-ahead. The same English + no-invent rules apply to any ClickUp comment.
+- If `--post`: compose the comment **in English** and show it to the user. Obtain confirmation unless this exact posting action is already explicitly authorized. Before posting, check currency and bind the review to `commit_id=<reviewed head_sha>` using `references/review-integrity.md`.
+  - Surviving blocking findings → `REQUEST_CHANGES`.
+  - Advisory findings or an incomplete review → `COMMENT`; never approve incomplete work.
+  - `APPROVE` only for a complete, current, clean review when the user explicitly asked to approve.
+  Post ONE review carrying the actual findings. Attach inline comments only to real pinned `file:line` evidence. No ClickUp posting is implied by a review request.
 
 ## Operating rules (always)
 

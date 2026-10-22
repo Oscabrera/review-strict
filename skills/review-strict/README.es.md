@@ -10,7 +10,7 @@ Parte de la familia de análisis: **`/spec-strict`** (el plan) → **`/review-st
 
 ## Qué hace
 
-Revisa un diff con rigor de staff engineer y **solo reporta errores** (nada de "looks good"), con evidencia `file:línea` y decisión final `approve` / `request-changes` / `comment`.
+Revisa un diff con rigor de staff engineer y **solo reporta errores** (nada de "looks good"), con evidencia `file:línea` y decisión final `approve` / `request-changes` / `comment` / `incomplete`.
 
 ## Cómo usarlo
 
@@ -37,7 +37,7 @@ Revisa un diff con rigor de staff engineer y **solo reporta errores** (nada de "
 ## Cómo funciona (6 fases)
 
 0. **Perfila el repo** — `AGENTS.md` + `CLAUDE.md` + `.claude/skills/*` (y `.aiassistant/rules/*` solo si existen). Precedencia local-gana.
-1. **Diff + toolchain** — saca el diff, excluye ruido (`specs/`, `vendor/`, `evidence/`, lockfiles) y captura Pint/PHPStan best-effort (usa evidencia/CI si existe; si no, lo omite — nunca bloquea).
+1. **Diff + toolchain** — saca el diff, fija base/head, conserva specs gobernantes y excluye artefactos irrelevantes y captura Pint/PHPStan best-effort (usa evidencia/CI si existe; si no, lo omite — nunca bloquea).
 2. **Fan-out de 5 lentes** (agentes independientes; híbrido por defecto — corrección/#4, seguridad, arquitectura en el modelo de sesión, tests + migración en Sonnet; `REVIEW_STRICT_MODEL`/`--model` fuerzan un modelo uniforme). Detecta agentes no-op y reintenta.
 3. **Verificación adversarial** — pase escéptico que mata falsos positivos (default-refute; siempre en el modelo de sesión).
 4. **Síntesis** — severidad en vocab del repo (Blocker/Major/Minor), más severo primero.

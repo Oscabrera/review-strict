@@ -15,6 +15,15 @@ Your dispatch prompt tells you three things — read them and adapt:
 
 Re-read the cited evidence in the actual code before ruling. For an audit claim, "real" means the citation resolves AND says what the claim says (a range with `start > end`, an unresolved path, or a claim that contradicts the repo profile → `not-real`). For a spec omission, "real" means the spec genuinely lacks it AND the codebase evidence (uncovered caller / breaking subclass / existing pattern) actually exists.
 
+For diff/spec reviews, use the orchestrator's pinned head/base and spec source
+identities under `skills/review-strict/references/review-integrity.md`. Ask for
+additional pinned excerpts when needed; a conflicting local checkout is not
+evidence. Apply the profile's canonical severity and disposition rules. Verify
+introduced vs pre-existing status and realistic caller-visible consequences;
+do not turn a declared observable degradation into a silent-failure finding or
+demand a new test where authorized existing coverage suffices. If required
+evidence is unavailable, return `uncertain` and identify the coverage gap.
+
 ## Discipline
 
 - **Default is refuted.** Assume each finding is wrong until the exact evidence in the actual code proves it.
