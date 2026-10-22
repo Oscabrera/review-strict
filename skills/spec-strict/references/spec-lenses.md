@@ -18,7 +18,7 @@ A finding is an **omission or defect in the spec that will cause rework at imple
 [{
   "lens": "coverage|ac-quality|verification|risk|architecture|scope",
   "severity": "block|should-fix|nice-to-have",
-  "spec_file": "spec.md|plan.json|pr.md|validation.md",
+  "spec_file": "<actual spec/design/contract/decision document path>",
   "spec_quote": "the exact line/claim in the spec that is wrong or missing (or 'ABSENT: <what>')",
   "omission": "one sentence: what the spec omits or gets wrong",
   "why": "how it bites at impl/PR time — the concrete rework it causes",
@@ -34,10 +34,10 @@ Severity: **block** = will cause a runtime fatal / re-open / wrong-stack command
 Does each AC/task cover **every** invocation path & caller, not just the documented/happy one? The classic Stratos miss: the fix targets one entry point and leaves the others latent (PR #1279: xdebug-off scoped to composer scripts but not the `./vendor/bin/pest` path the verify lane uses). Grep the repo for the *other* callers/entry points of the thing being changed; if the spec's AC doesn't cover them, that's the finding. **block** if an uncovered path re-triggers the very bug the spec exists to fix.
 
 ## Lens 2 — AC quality & diff-checkability
-Every AC must map to **concrete files + a real test** and be mechanically verifiable against a future diff (the repo's `AGENTS.md` AC-discipline is the oracle). Flag: template-fill / self-referential ACs ("Verified by `composer.json` test scripts" as its own file+test+evidence), ACs with no test, vacuous/intent ACs ("handles it gracefully"), traceability tables where Files/Tests/Evidence columns are placeholders. **should-fix** (block if a load-bearing AC has no way to be verified at all).
+Every AC must name an observable invariant and a verification allowed by the repo's actual contract: an existing test, a justified new test, or an authorized non-test disposition. Search existing coverage before prescribing another test. Flag template-fill/self-referential ACs, unverifiable intent, and placeholder traceability. For each load-bearing assertion, show concrete plausible changes that leave it green while breaking its invariant; follow the canonical rubric's required exercise and clean/vacuous outcomes when present. Check the frozen Test Intent matrix under `../../review-strict/references/stratos-contracts.md`; do not promote shadow policy into a gate. **should-fix** (block if a load-bearing AC has no valid verification).
 
 ## Lens 3 — Verification-command sanity  *(cheap, high-value)*
-Do the commands the spec/`pr.md`/`validation.md` tell a reviewer to run **actually exist for this stack**? Cross-check against the repo's real runner (from `composer.json` scripts / `AGENTS.md` build-lint-test / `package.json`). Catch wrong-ecosystem commands (e.g. `pnpm exec vitest ...` emitted into a PHP/Pest repo — PR #1279), wrong script names, wrong paths. A command a reviewer can't run proves nothing. **should-fix** (block if it's the *only* stated verification).
+Do the commands in the spec and its sibling documents **actually exist and exercise the promised invariant**? Cross-check the real runner, invocation path, build steps, and environment. Trace proposed helpers to a real production consumer that can load them (a workflow expression cannot import a TypeScript function). Verify failure injection/mode activation before trusting a negative test; distinguish an early return counted as passed from an explicit skip. Catch wrong-stack commands, unavailable historical refs in shallow CI, and proxy checks that never execute the claimed gate. **should-fix** (block if the only verification cannot establish the load-bearing invariant).
 
 ## Lens 4 — Blocker / risk inventory (grounded)
 Read the code the plan will touch to find what it **didn't foresee**: callers/subclasses/implementers that break on a signature change (PR #1279's 2 LSP test-double fatals), a migration without rollback, an idempotency/at-least-once hazard, a missing seed/fixture the tests will need, a static-analysis rule the change will trip. Also: risks the spec *states* but doesn't mitigate. **block** for a foreseeable runtime fatal; **should-fix** for a likely late fix commit.

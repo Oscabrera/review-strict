@@ -4,13 +4,22 @@
 
 Reason internally in P0/P1/P2; report in the **repo's vocabulary** (from the profile). Default crosswalk when the repo uses Blocker/Major/Minor:
 
+The table below is a fallback. A canonical repo contract overrides its impact,
+blocking and disposition semantics, not merely its words. Diff/spec review
+completion and currency follow [review-integrity.md](review-integrity.md).
+
 | Internal | Repo term | Meaning | Blocks merge? |
 |---|---|---|---|
 | **P0** | **Blocker** | Data loss, security breach, production outage, red-line violation, load-bearing behavior broken/untested, false-coverage stub tests, hardcoded env paths in runtime code, unsafe migration | **Yes** |
-| **P1** | **Major** | Should fix in this PR: architecture debt, recoverable error-handling gap, N+1 with real exposure, missing tests for real behavior, missing docblocks on new public API | Should |
+| **P1** | **Major** | Significant non-incident defect or maintainability risk | Per disposition policy |
 | **P2** | **Minor** | Cosmetic, naming, small refactor — deferrable if justified | No |
 
-If the repo defines different words or levels, map onto them and keep the "blocks merge" column semantics.
+If the repo defines different words or levels, use its meanings and disposition
+policy. With no repo vocabulary, render Blocker/Major/Minor in the report (P0/P1/P2
+are the internal identifiers). In synthesis, record `blocking: true|false` and
+the reason independently of severity. A Major behavior regression can require
+changes without being relabeled an incident-grade Blocker. Repo-authorized
+advisories stay non-blocking. Any surviving `blocking: true` requires changes.
 
 **Spec-review vocabulary (`/spec-strict`).** A spec review reports readiness, not merge-blocking, so it uses its own words that map 1:1 onto the internal levels:
 
@@ -20,7 +29,7 @@ If the repo defines different words or levels, map onto them and keep the "block
 | **P1** | **should-fix** | Will cost a fix commit or a reviewer round-trip. |
 | **P2** | **nice-to-have** | Clarity / robustness. |
 
-Any surviving **block** → the readiness verdict is `revise-before-Forge`; otherwise `ready` (with should-fix / nice-to-have listed).
+Any surviving **block** → `revise-before-Forge`. Without a known block, missing applicable work, required context, or source currency → `incomplete`; only a completed current review → `ready`.
 
 ## Verification protocol (Phase 3)
 
@@ -45,7 +54,9 @@ Author the report in the resolved language (**English by default**; Spanish when
 ```markdown
 # Review — <repo> · <PR #N | branch <name>> vs <base>
 
-- **Decision:** request-changes | comment | approve
+- **Decision:** request-changes | comment | approve | incomplete
+- **Subject:** full reviewed base/head SHAs (spec review: codebase SHA + spec snapshot identities)
+- **Coverage / currency:** completed or explicit gaps; current | stale | unknown
 - **Estimated effort to review:** <1–10>/10   <!-- include only if the repo's rules ask for it -->
 - **Recommended focus areas:** <3–5 comma-separated areas>
 - **Profile:** <repo rules loaded | generic staff baseline (no repo rules found)>
@@ -58,14 +69,14 @@ Author the report in the resolved language (**English by default**; Spanish when
 <!-- most-severe first; omit an empty severity section. ONE finding = ONE line. -->
 
 ### Blockers
-- [ ] **[P0] `<file>:<line>` — <what>** · Why: <one sentence> · Fix: <one sentence>
+- [ ] **[Blocker] `<file>:<line>` — <what>** · Blocking: yes · Why: <one sentence> · Fix: <one sentence>
   `<evidence hunk>`   <!-- evidence line ONLY for Blockers/Major -->
 
 ### Major
-- [ ] **[P1] `<file>:<line>` — <what>** · Why: <one sentence> · Fix: <one sentence>
+- [ ] **[Major] `<file>:<line>` — <what>** · Blocking: <yes/no + reason> · Why: <one sentence> · Fix: <one sentence>
 
 ### Minor
-- [ ] **[P2] `<file>:<line>` — <what>** · Fix: <one sentence>
+- [ ] **[Minor] `<file>:<line>` — <what>** · Fix: <one sentence>
 
 ## Reviewer attention (uncertain — needs human eyes)
 - <file>:<line> — <what to check and why>
@@ -80,6 +91,7 @@ Rules for the report:
 - **Errors only.** No praise, no summary of what the PR does. If there are zero blocking findings, say so plainly and list any Major/Minor.
 - **Every finding cites `file:line` + evidence.** Drop anything that can't.
 - **Final decision is honest:** any surviving Blocker → `request-changes`.
+- **No approval from missing work:** an incomplete diff review is `incomplete` (`COMMENT` if posted). Optional build checks may be not run; missing applicable lenses or required canonical obligations may not be called clean.
 - Keep it scannable: conclusion (decision) at the top, detail below.
 
 ## Brevity & readability (applies to EVERY skill's output — review / audit / spec)

@@ -6,7 +6,7 @@ Disponible en Claude Code y Codex. En Codex, invoca `$spec-strict`; Codex hereda
 
 Una **revisión estricta y adaptativa al repo de un spec de Stratos/Axiom — antes de escribir código.**
 El hermano pre-código de `/review-strict`: en vez de revisar un diff, revisa el **spec dir**
-(`spec.md`, `plan.json`, `pr.md`, `validation.md`) en la rama del feature y caza las omisiones que
+(`spec.md`, diseño/contratos/decisiones y los demás documentos gobernantes) en la rama del feature y caza las omisiones que
 los specs de Stratos dejan de forma recurrente, para que se arreglen en el plan en lugar de volverse
 fix commits en el PR.
 
@@ -53,7 +53,7 @@ aplica sus ediciones al spec, y deja que Forge implemente un spec ya endurecido.
 Una review archivada en `$REVIEW_STRICT_ARCHIVE_DIR/<repo>/spec-reviews/<spec-slug>.md` cuando esa
 variable está definida (el caso de carpeta central de notas), si no `spec-review.md` junto al spec;
 `--out <dir>` gana sobre ambos. Trae un **veredicto de readiness**
-(`ready` / `revise-before-Forge`), findings agrupados por lente (severidad: **block** / **should-fix**
+(`ready` / `revise-before-Forge` / `incomplete`), findings agrupados por lente (severidad: **block** / **should-fix**
 / **nice-to-have**), cada uno redactado como la edición exacta a aplicar al spec, más una nota de cobertura.
 
 ## Reglas
@@ -65,5 +65,5 @@ variable está definida (el caso de carpeta central de notas), si no `spec-revie
 
 ## Aún no (roadmap)
 
-- Un **gate en el pipeline**: correr `/spec-strict` automáticamente tras Axiom, antes de Forge — el leverage real de shift-left (vive en `cyberpuerta/stratos-autopilot`).
+- El gate automático del pipeline queda fuera del alcance de este plugin; `/spec-strict` sigue bajo demanda.
 - Alimentar el patrón de omisiones recurrentes al prompt de authoring de Axiom (fix de raíz).
