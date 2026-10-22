@@ -10,11 +10,22 @@ any spec/CI pipeline — point it at a PR, a branch, or a diff.
 
 The plugin ships **three sibling skills** — the analysis family, in workflow order:
 
-- **`/spec-strict`** — pre-code review of a Stratos/Axiom spec dir (`spec.md`/`plan.json`/`pr.md`/`validation.md`), **before** Forge writes code; hunts omissions (uncovered entry-points, non-diff-checkable ACs, wrong-stack verification commands, incomplete risk inventory, layering misfit, unstable scope). See `skills/spec-strict/README.md`.
+- **`/spec-strict`** — pre-code review of a Stratos/Axiom spec dir (`spec.md`, design, contracts, decisions, and supporting verification documents), **before** Forge writes code; hunts omissions (uncovered entry-points, non-diff-checkable ACs, wrong-stack verification commands, incomplete risk inventory, layering misfit, unstable scope). See `skills/spec-strict/README.md`.
 - **`/review-strict`** — the diff/PR review above (correctness, security, architecture + SOLID + complexity, tests, migration safety).
 - **`/audit-strict`** — deep whole-repo architecture audit (component map, flows, lifecycle, data model, quality audit + prioritized roadmap). See `skills/audit-strict/README.md`.
 
 Together: **`/spec-strict` reviews the plan → `/review-strict` reviews the change → `/audit-strict` reviews the repo.**
+
+## Review integrity
+
+Diff and spec reviews load scoped rules and canonical repo contracts, including
+Stratos Test Intents when present. They record the reviewed commits, read
+relevant design/contract/decision documents, and report `incomplete` when
+required work or source currency is missing. These remain on-demand tools;
+they do not replace Sentinel or add a mandatory pre-code gate.
+
+The context helper requires Python 3 and Git, with no third-party packages.
+The instructions include a Git fallback when Python is unavailable.
 
 ## Install
 
@@ -150,7 +161,7 @@ Reports are review **output**, not source — the in-repo `reviews/` folder is a
 ## How it works
 
 1. **Profile the repo** — reads `AGENTS.md`, `CLAUDE.md`, `.codex/skills/*`, `.claude/skills/*` (and legacy `.aiassistant/rules/*` only if present), local-wins.
-2. **Diff + toolchain** — pulls the diff, excludes noise (`specs/`, `vendor/`, lockfiles), captures lint/static-analysis best-effort (evidence/CI if available; never blocks).
+2. **Diff + toolchain** — pulls the diff, keeps governing specs and excludes irrelevant artifacts, captures lint/static-analysis best-effort (evidence/CI if available; never blocks).
 3. **Five adversarial lenses** in parallel — correctness/requirements, security, architecture & reuse, tests, migration safety. No-op agents are retried.
 4. **Adversarial verification** — a skeptic pass refutes each finding against the diff; only evidenced findings survive.
 5. **Synthesize** — severities mapped to the repo's vocabulary (Blocker/Major/Minor), most-severe first.

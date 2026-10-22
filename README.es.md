@@ -10,11 +10,22 @@ cualquier pipeline de spec/CI — apúntalo a un PR, una rama o un diff.
 
 El plugin trae **tres skills hermanas** — la familia de análisis, en orden de flujo:
 
-- **`/spec-strict`** — revisión pre-código de un spec dir de Stratos/Axiom (`spec.md`/`plan.json`/`pr.md`/`validation.md`), **antes** de que Forge escriba código; caza omisiones (entry-points no cubiertos, ACs no diff-checkables, comandos de verificación del stack equivocado, inventario de riesgos incompleto, mal encaje de capas, scope inestable). Ver `skills/spec-strict/README.md`.
+- **`/spec-strict`** — revisión pre-código de un spec dir de Stratos/Axiom (`spec.md`, diseño, contratos, decisiones y documentos de verificación), **antes** de que Forge escriba código; caza omisiones (entry-points no cubiertos, ACs no diff-checkables, comandos de verificación del stack equivocado, inventario de riesgos incompleto, mal encaje de capas, scope inestable). Ver `skills/spec-strict/README.md`.
 - **`/review-strict`** — la revisión de diff/PR de arriba (corrección, seguridad, arquitectura + SOLID + complejidad, tests, seguridad de migraciones).
 - **`/audit-strict`** — auditoría de arquitectura profunda de todo el repo (mapa de componentes, flujos, ciclo de vida, modelo de datos, auditoría de calidad + roadmap priorizado). Ver `skills/audit-strict/README.md`.
 
 En conjunto: **`/spec-strict` revisa el plan → `/review-strict` revisa el cambio → `/audit-strict` revisa el repo.**
+
+## Integridad de la revisión
+
+Las revisiones de diff y spec cargan las reglas aplicables y los contratos del
+repo, incluidos Test Intents de Stratos cuando existen. Registran los commits
+revisados, leen diseño, contratos y decisiones, y reportan `incomplete` si falta
+trabajo requerido o no pueden confirmar la vigencia del código. Siguen siendo
+herramientas bajo demanda; no sustituyen a Sentinel ni agregan un gate obligatorio.
+
+El helper requiere Python 3 y Git, sin paquetes adicionales. Las instrucciones
+incluyen una alternativa con Git cuando Python no está disponible.
 
 ## Instalación
 
@@ -150,7 +161,7 @@ Los reportes son **salida** de review, no código fuente — la carpeta in-repo 
 ## Cómo funciona
 
 1. **Perfila el repo** — lee `AGENTS.md`, `CLAUDE.md`, `.codex/skills/*`, `.claude/skills/*` (y los legacy `.aiassistant/rules/*` solo si existen), local-gana.
-2. **Diff + toolchain** — saca el diff, excluye ruido (`specs/`, `vendor/`, lockfiles), captura lint/static-analysis best-effort (evidencia/CI si está disponible; nunca bloquea).
+2. **Diff + toolchain** — saca el diff, conserva specs gobernantes y excluye artefactos irrelevantes, captura lint/static-analysis best-effort (evidencia/CI si está disponible; nunca bloquea).
 3. **Cinco lentes adversariales** en paralelo — corrección/requisitos, seguridad, arquitectura & reuso, tests, seguridad de migraciones. Los agentes no-op se reintentan.
 4. **Verificación adversarial** — un pase escéptico refuta cada finding contra el diff; solo sobreviven los evidenciados.
 5. **Síntesis** — severidades mapeadas al vocabulario del repo (Blocker/Major/Minor), más severo primero.

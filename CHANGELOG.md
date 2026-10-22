@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.0
+- **Immutable review subjects.** Added a dependency-free Python 3/Git helper for branch diffs, spec detection, and pinned blob reads. Removed the invalid `--merge-base A...B` recipe; missing bases and ambiguous specs now fail visibly. PR review freezes full base/head OIDs, reads the same source throughout, checks currency, and binds posted reviews to the reviewed commit. Dirty working-tree inputs are disclosed or explicitly snapshotted.
+- **Complete reviews before approval.** Diff/spec reviews now track applicable obligations and distinguish `incomplete` from clean approval/readiness. Known blocking findings still require changes even when coverage has gaps. Best-effort build checks remain optional; unverified CI is never presented as corroboration.
+- **Current repository contracts.** Scoped rules, nested instructions, and canonical severity/disposition/spec-review contracts take precedence over generic checklists. The Stratos adapter reads frozen Test Intent policy and test-value rules without introducing another pipeline gate or manufacturing Sentinel evidence.
+- **Whole spec context and stronger assertions.** Read design, contracts, decisions, and relevant sibling documents; check consumer reachability, failure-injection activation, existing-test reuse, and concrete green-but-broken mutations. Optional files and a new test per AC are no longer universal requirements.
+- **Validation.** Real-Git regression cases run with `python3 -m unittest discover -s tests -p "test_*.py"`; the existing archive-hook suite remains `bash tests/hooks/test-block-inrepo-spec-review.sh`.
+
 ## 1.3.1
 - **Codex compatibility.** Added `.codex-plugin/plugin.json`, a Git-backed repo marketplace at `.agents/plugins/marketplace.json`, and `hooks/hooks.json`. The three existing skills remain shared with Claude Code and now load a host adapter that maps typed Claude agents/model selectors to Codex sub-agents, concurrency, and inherited models. The archive guard also recognizes Codex's canonical `apply_patch` envelope.
 
