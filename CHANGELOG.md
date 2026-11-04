@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.4.1
+- **Decoupled rules and descriptions.** Removed internal and company-specific references across skill descriptions, baseline criteria, complexity budgets, and repository profiling, making the plugin fully generic and portable.
+
 ## 1.4.0
 - **Immutable review subjects.** Added a dependency-free Python 3/Git helper for branch diffs, spec detection, and pinned blob reads. Removed the invalid `--merge-base A...B` recipe; missing bases and ambiguous specs now fail visibly. PR review freezes full base/head OIDs, reads the same source throughout, checks currency, and binds posted reviews to the reviewed commit. Dirty working-tree inputs are disclosed or explicitly snapshotted.
 - **Complete reviews before approval.** Diff/spec reviews now track applicable obligations and distinguish `incomplete` from clean approval/readiness. Known blocking findings still require changes even when coverage has gaps. Best-effort build checks remain optional; unverified CI is never presented as corroboration.
