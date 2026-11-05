@@ -1,0 +1,88 @@
+{
+  "cases": [
+    {
+      "id": "01",
+      "spec": "Goal: reject a malformed payload. Current faulty code returns 200. Proposed AC: the committed test must assert status == 200 on both faulty base and fixed head. No other verification is planned.",
+      "source": "def handle(payload):\n    return 200  # current faulty base\n",
+      "expected": "revise-before-Forge",
+      "rationale": "The proposed assertion expects the faulty result and cannot protect the required rejection."
+    },
+    {
+      "id": "02",
+      "spec": "Goal: reject malformed payload. Current faulty code returns 200. Proposed fix returns 400. The committed assertion expects 400 on either tree; record observed base 200 as failure evidence, not the expected value. Existing runner invokes handle directly. No new sidecar is required.",
+      "source": "def handle(payload):\n    return 200\n",
+      "expected": "ready",
+      "rationale": "Fixed oracle is independent of the faulty implementation."
+    },
+    {
+      "id": "03",
+      "spec": "Goal: stop accepting work when transport fails. Spec verification sets INJECT_FAILURE=1 and asserts the client rejected. The only claimed injection mechanism is this source. The plan changes transport error handling but does not add injection support; it states setting the variable proves the transport fault activated.",
+      "source": "def transport():\n    return \"ok\"\ndef client():\n    return transport()\n",
+      "expected": "revise-before-Forge",
+      "rationale": "The existing source does not read the injection variable; the claimed injection is inoperative."
+    },
+    {
+      "id": "04",
+      "spec": "Goal: stop accepting work on a transport fault. Planned verification supplies a transport double that records invocation and throws a sentinel exception. Each isolated test first asserts the sentinel probe fires with the same double, then invokes the client and expects its documented rejected result. Existing success double remains an accept control.",
+      "source": "def client(transport):\n    return transport()\n",
+      "expected": "ready",
+      "rationale": "Explicit per-invocation injected dependency and safe control provide a meaningful proposed check."
+    },
+    {
+      "id": "05",
+      "spec": "Goal: preserve escape-bearing raw command bytes in the supported runner. The acceptance check uses the supplied runner, asserts mode_on, then claims base and fixed transports diverge when raw bytes contain a backslash. This is the only evidence required for the claim; no alternate runtime or semantic probe is planned.",
+      "source": "def runner():\n    return {\"mode_on\": True, \"base_bytes\": b\"a\\\\b\", \"fixed_bytes\": b\"a\\\\b\"}\n",
+      "expected": "revise-before-Forge",
+      "rationale": "Mode activation does not imply divergence; supplied runner returns identical bytes."
+    },
+    {
+      "id": "06",
+      "spec": "Goal: remove interpretation from transport. The supported-runner fixture below deterministically demonstrates the bug. Planned AC verifies the semantic probe base_bytes != raw and fixed_bytes == raw, then checks both transports with a no-escape control where bytes agree. The test oracle is literal raw bytes.",
+      "source": "raw = b\"a\\\\b\"\ndef runner():\n    return {\"raw\": raw, \"base_bytes\": b\"ab\", \"fixed_bytes\": raw}\n",
+      "expected": "ready",
+      "rationale": "Semantic activation and a no-escape control are explicit and independent."
+    },
+    {
+      "id": "07",
+      "spec": "Goal: reject malformed input while preserving valid-input success. Requirements and the AC Then clause explicitly require both directions. The entire verification plan lists only a malformed-input rejection assertion; no existing valid-input check exists and no non-test disposition is authorized.",
+      "source": "def handle(valid):\n    return 200 if valid else 400\n",
+      "expected": "revise-before-Forge",
+      "rationale": "The only verification cannot protect the required success direction; always-reject stays green."
+    },
+    {
+      "id": "08",
+      "spec": "Goal: reject malformed input while preserving valid-input success. Verification reuses an existing direct test for valid input expecting 200 and adds a malformed-input check expecting 400. Existing assertions use literal statuses. No new valid-input duplicate is required.",
+      "source": "def handle(valid):\n    return 200 if valid else 400\ndef existing_test():\n    assert handle(True) == 200\n",
+      "expected": "ready",
+      "rationale": "Existing independent success coverage suffices."
+    },
+    {
+      "id": "09",
+      "spec": "spec.md: scope covers only local default mode. design.md: observed default-mode base/head results agree; inherited alternate modes are excluded. decisions.md: load-bearing handoff requirement says the implementation MUST preserve byte identity in ALL inherited modes. No decision supersedes this entry. Resolve the contract before implementation.",
+      "source": "def transmit(raw, mode=\"default\"):\n    return raw if mode == \"default\" else raw.replace(\"\\\\c\", \"\")\n",
+      "expected": "revise-before-Forge",
+      "rationale": "Governing sibling claims contradict the selected bounded contract."
+    },
+    {
+      "id": "10",
+      "spec": "spec.md: scope covers only local default mode. design.md and decisions.md both explicitly supersede the older all-mode claim; alternate modes are an accepted residual authorized in the fixture contract. Verification uses a literal default-mode byte oracle. Optional validation.md and plan.json do not exist in this pre-code stage.",
+      "source": "def transmit(raw, mode=\"default\"):\n    return raw if mode == \"default\" else raw.replace(\"\\\\c\", \"\")\n",
+      "expected": "ready",
+      "rationale": "Consistent explicitly narrowed scope, with no invented optional-sidecar obligation."
+    },
+    {
+      "id": "11",
+      "spec": "Goal: portable inherited-mode behavior. The only proposed check depends on an external runner whose version and semantics are not supplied or available. The fixture contract requires verification of that runtime assumption before readiness. The plan proposes no contradictory assertion. Do not guess behavior or require implementation first.",
+      "source": "# External runner is unavailable; no semantics evidence supplied.\n",
+      "expected": "incomplete",
+      "rationale": "Missing required runtime evidence is an incomplete assessment, not a demonstrated spec defect."
+    },
+    {
+      "id": "12",
+      "spec": "Goal: label-only documentation correction. Scope changes the title of a command reference; no runtime, behavior or governing contract changes. Existing documentation review is the authorized verification. No runtime exercise or new tests are required.",
+      "source": "# No runtime changes in this fixture.\n",
+      "expected": "ready",
+      "rationale": "Unrelated change should not trigger operational or runtime-probe requirements."
+    }
+  ]
+}

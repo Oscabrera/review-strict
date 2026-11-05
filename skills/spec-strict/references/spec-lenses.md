@@ -12,7 +12,7 @@ A finding is an **omission or defect in the spec that will cause rework at imple
 - Don't rewrite scope you merely dislike — flag scope that is *ambiguous/unbounded* (invites in-flight rescope), not scope you'd have drawn differently.
 - `[]` (no findings) is a valid, honest result for a clean spec. Never manufacture.
 
-## Finding contract (all lenses return this)
+## Finding contract
 
 ```json
 [{
@@ -32,6 +32,10 @@ Severity: **block** = will cause a runtime fatal / re-open / wrong-stack command
 
 ## Lens 1 — Surface / entry-point coverage  *(top-value lens)*
 Does each AC/task cover **every** invocation path & caller, not just the documented/happy one? The classic Stratos miss: the fix targets one entry point and leaves the others latent (PR #1279: xdebug-off scoped to composer scripts but not the `./vendor/bin/pest` path the verify lane uses). Grep the repo for the *other* callers/entry points of the thing being changed; if the spec's AC doesn't cover them, that's the finding. **block** if an uncovered path re-triggers the very bug the spec exists to fix.
+
+For AC-quality and verification dispatches requesting `invariant_assessment`,
+return `{"findings": [...], "invariant_assessments": [...]}` with entries from
+`invariant-ledger.md`. Other lenses retain the original findings array.
 
 ## Lens 2 — AC quality & diff-checkability
 Every AC must name an observable invariant and a verification allowed by the repo's actual contract: an existing test, a justified new test, or an authorized non-test disposition. Search existing coverage before prescribing another test. Flag template-fill/self-referential ACs, unverifiable intent, and placeholder traceability. For each load-bearing assertion, show concrete plausible changes that leave it green while breaking its invariant; follow the canonical rubric's required exercise and clean/vacuous outcomes when present. Check the frozen Test Intent matrix under `../../review-strict/references/stratos-contracts.md`; do not promote shadow policy into a gate. **should-fix** (block if a load-bearing AC has no valid verification).

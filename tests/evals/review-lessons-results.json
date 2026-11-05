@@ -1,0 +1,117 @@
+{
+  "runtime": "Python 3.14.7",
+  "spec": [
+    {
+      "id": "01",
+      "fast": "revise-before-Forge",
+      "normal": "revise-before-Forge"
+    },
+    {
+      "id": "02",
+      "fast": "ready",
+      "normal": "ready"
+    },
+    {
+      "id": "03",
+      "fast": "revise-before-Forge",
+      "normal": "revise-before-Forge"
+    },
+    {
+      "id": "04",
+      "fast": "ready",
+      "normal": "ready"
+    },
+    {
+      "id": "05",
+      "fast": "revise-before-Forge",
+      "normal": "revise-before-Forge"
+    },
+    {
+      "id": "06",
+      "fast": "ready",
+      "normal": "ready"
+    },
+    {
+      "id": "07",
+      "fast": "revise-before-Forge",
+      "normal": "revise-before-Forge"
+    },
+    {
+      "id": "08",
+      "fast": "ready",
+      "normal": "ready"
+    },
+    {
+      "id": "09",
+      "fast": "revise-before-Forge",
+      "normal": "revise-before-Forge"
+    },
+    {
+      "id": "10",
+      "fast": "ready",
+      "normal": "ready"
+    },
+    {
+      "id": "11",
+      "fast": "incomplete",
+      "normal": "incomplete"
+    },
+    {
+      "id": "12",
+      "fast": "ready",
+      "normal": "ready"
+    }
+  ],
+  "review_fast": [
+    {
+      "id": "01",
+      "disposition": "correct-draft; no source defect established"
+    },
+    {
+      "id": "02",
+      "disposition": "correct-draft; no source defect established"
+    },
+    {
+      "id": "03",
+      "disposition": "no scoped findings; factual explanation verified"
+    },
+    {
+      "id": "04",
+      "disposition": "request-changes within scoped contract"
+    },
+    {
+      "id": "05",
+      "disposition": "request-changes within scoped contract"
+    },
+    {
+      "id": "06",
+      "disposition": "comment; accepted operational risk is nonblocking"
+    },
+    {
+      "id": "07",
+      "disposition": "request-changes within scoped contract"
+    },
+    {
+      "id": "08",
+      "disposition": "no scoped findings; parity evidence sufficient for supplied field"
+    },
+    {
+      "id": "09",
+      "disposition": "no scoped findings; caller-boundary compatibility demonstrated"
+    },
+    {
+      "id": "10",
+      "disposition": "incomplete; required parity proof unavailable"
+    }
+  ],
+  "execution": {
+    "spec_fast": "all six lens briefs and skeptic applied inline by an independent evaluator",
+    "spec_normal": "six independent lens agents plus a separate skeptic, sequential dispatch at available host capacity; one contaminated dispatch discarded and replaced before use",
+    "review_fast": "five lens briefs and skeptical approval/state/parity checks applied inline by independent evaluator"
+  },
+  "limits": [
+    "Manually classified implementation-session reference key; not an independently human-adjudicated benchmark.",
+    "Synthetic frozen inputs only; no full PR/provider/CI/deployment approval.",
+    "Normal workflow evaluated for spec cases; diff semantic cases evaluated in fast mode, while delivery tests exercise both mode labels."
+  ]
+}
