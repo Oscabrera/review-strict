@@ -77,6 +77,13 @@ or `not-completed` (the missing evidence/work). An empty findings array is valid
 after real work. It is not proof that a missing lens ran. The same applies to
 the skeptic, including an explicitly completed inline fallback.
 
+For a triggered operational check (`operational-risk.md`), include the
+correctness/architecture/tests assessments, each declared/discovered risk's
+disposition, and the skeptic's coverage audit. Zero findings alone do not
+complete these obligations. Missing required caller, effective-budget, or
+dependency-semantics evidence is `not-completed`; a clearly stated unknown
+deployment capacity is not a reason to hide an otherwise proven regression.
+
 - A surviving blocking defect yields `request-changes` / `revise-before-Forge`,
   even if some coverage is incomplete; state the coverage gap too.
 - Without a known blocker, any `not-completed` obligation, missing required

@@ -10,7 +10,7 @@ This is the independent standard `/review-strict` applies **on top of** whatever
 
 3. **Defensive programming.** Validate inputs; handle null/empty/boundary cases; fail safe; never assume the happy path or trust callers. Fail-safe includes **config/env boolean coercion**: a flag or kill-switch read from `env()` and consumed by truthiness fails OPEN for any off-synonym `env()` does not map (`off`/`no`/`disabled` stay truthy strings and *arm* the guarded behavior) — require `filter_var(FILTER_VALIDATE_BOOLEAN)` (or an explicit cast) at the boundary, and expect tests to cover the off-synonyms, not just `false`/`null`. (Security lens owns the deep check.)
 
-4. **Performance hygiene.** No read or write N+1; no unbounded materialization of a table into memory (prefer anti-joins + bounded `whereIn` over chunks); bounded worker memory; real indexes on the columns actually filtered.
+4. **Performance hygiene.** No read or write N+1; no unbounded materialization of a table into memory (prefer anti-joins + bounded `whereIn` over chunks); bounded worker memory; real indexes on the columns actually filtered. In `/review-strict`, changes to retries, timeouts/deadlines, blocking waits, fan-out, or concurrency limits require the scoped budget/caller/resource assessment in `operational-risk.md`.
 
 5. **Low cyclomatic complexity.** Small, single-responsibility methods; flatten nesting with early returns/guard clauses. Report complexity with a **concrete metric and number**, not "too complex" — cyclomatic complexity is the headline; also weighted class complexity (Σ of method CC), method/class length, parameter count, public-method count and coupling. Since PHPMD/PHP Insights usually aren't wired into these repos, **count it from the changed code yourself** (exact where countable; CC as an estimate from decision points). Repo-configured limits (`phpmd.xml`/`phpinsights.php`/PHPStan) win on thresholds; the architecture lens carries the PHPMD-derived default budget when the repo is silent.
 
@@ -20,7 +20,7 @@ This is the independent standard `/review-strict` applies **on top of** whatever
 
 - The baseline **adds coverage**, it does not override the repo. If the repo defines severities as Blocker/Major/Minor, report baseline findings in those words too.
 - If the repo's rules and the baseline point at the same defect, report it once (dedup in Phase 3), attributing to the repo rule (more specific).
-- If the baseline flags something the repo explicitly allows (e.g. a documented exception), **defer to the repo** and do not flag it. The repo is authoritative about its own trade-offs.
+- A repo-authorized convention exception is not itself a defect. A demonstrated behavior/resource risk remains a finding even when documented or accepted; verify the acceptance's authority and scope, and apply the repo's disposition policy without treating acceptance as mitigation or suppressing the evidence.
 
 ## Generic stack defaults (used only when the repo declares nothing)
 

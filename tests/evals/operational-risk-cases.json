@@ -1,0 +1,86 @@
+[
+  {
+    "id": "case-01",
+    "snapshot": "121a9345ecf5ea27815f618b854d0e42cfd94ea5",
+    "expected": "request-changes",
+    "reason": "A no-response timeout is repeated with a fresh budget; acceptance is unverified and cannot erase the latency regression."
+  },
+  {
+    "id": "case-02",
+    "snapshot": "8f6f094a1e2e8e6a186c7d4c43e1831e9cba37ff",
+    "expected": "approve",
+    "reason": "Exhausted budgets stop retries; fast failures get the remaining time. Fake-clock tests exercise both. No original budget-regression finding."
+  },
+  {
+    "id": "case-03",
+    "files": {
+      "client.py": "def get(client, clock, budget=3):\n    start = clock.now()\n    for attempt in range(3):\n        remaining = budget - (clock.now() - start)\n        if remaining <= 0:\n            raise DeadlineExceeded()\n        try:\n            return client.get(timeout=remaining)\n        except TransportError:\n            if attempt == 2:\n                raise\n            if budget - (clock.now() - start) <= 0.1:\n                raise\n            clock.sleep(0.1)\n",
+      "context.txt": "Client.get honors timeout as a whole-attempt deadline and releases its connection on failure. TransportError includes timeout. Caller: one GET per web request; prior timeout 3 s. No nested retries. Tests use a fake clock: full 3 s consumption -> one attempt, elapsed <= 3 s, and no sleep; failure after 0.5 s -> next timeout 2.4; max attempt count covered. No actual traffic or worker-pool size is supplied. Review only the changed retry behavior; ignore unrelated style."
+    },
+    "expected": "approve",
+    "reason": "Shared budget recalculated after waits; existing deterministic guards suffice. Unknown pool sizes do not themselves make this incomplete."
+  },
+  {
+    "id": "case-04",
+    "files": {
+      "client.py": "def get(client):\n    for attempt in range(2):\n        try:\n            return client.get(timeout=2)\n        except ConnectionRefused:\n            if attempt == 1:\n                raise\n",
+      "context.txt": "Dependency version 2 guarantees ConnectionRefused occurs before sending within 0.01 s; timeouts raise a separate ReadTimeout and cannot enter this catch. Prior single-attempt timeout 2 s. Caller one GET per isolated worker job; approved total deadline 3 s. Existing tests prove ReadTimeout is not retried, refusal retries once, and the second failure stops. No waits, nested retry, or connection retained on refusal. No broader retry defect is introduced."
+    },
+    "expected": "approve",
+    "reason": "Only bounded fast refusals repeat; no blanket requirement to reject all retries or add a new clock test."
+  },
+  {
+    "id": "case-05",
+    "files": {
+      "client.py": "def get(client):\n    for attempt in range(3):\n        try:\n            return client.get(timeout=0)\n        except NoResponse:\n            if attempt == 2:\n                raise\n",
+      "context.txt": "Before: one GET with timeout=0. Dependency v6 stream handler: 0 inherits runtime socket timeout; deployment sets it to 60 s. NoResponse covers timeout and fast transport failure. Caller is one synchronous checkout worker request. New tests throw immediate NoResponse and assert three calls. No cap, capacity data, or authorized latency acceptance supplied. PR: timeout is zero, so this is cheap."
+    },
+    "expected": "request-changes",
+    "reason": "Inherited 60 s default creates a calculable 180 s per-call bound and missing elapsed-time coverage; pool outage remains unproven."
+  },
+  {
+    "id": "case-06",
+    "files": {
+      "client.py": "def checkout(client):\n    for delivery in range(3):\n        for attempt in range(3):\n            try:\n                client.get(delivery, timeout=10)\n                break\n            except NoResponse:\n                if attempt == 2:\n                    record_fallback(delivery)\n",
+      "context.txt": "Before: one attempt per delivery, same serial delivery loop. Whole-attempt timeout 10 s; NoResponse includes timeout. All failures release connections but retain the synchronous web worker until checkout returns. Tests raise NoResponse instantly and assert 9 calls and three fallbacks. No total deadline. PR calls the 3x latency an accepted risk, but provides no authority or caller analysis."
+    },
+    "expected": "request-changes",
+    "reason": "Three serial callers multiply three full attempts: calculated bound grows from 30 to 90 seconds, without assuming real traffic."
+  },
+  {
+    "id": "case-07",
+    "files": {
+      "client.py": "def get(client, clock, budget=3):\n    start = clock.now()\n    for attempt in range(3):\n        remaining = budget - (clock.now() - start)\n        if remaining <= 0:\n            raise DeadlineExceeded()\n        try:\n            return client.get(timeout=remaining)\n        except TransportError:\n            if attempt == 2:\n                raise\n            if budget - (clock.now() - start) <= 0.1:\n                raise\n            clock.sleep(0.1)\n",
+      "context.txt": "Client.get honors timeout as a whole-attempt deadline and releases its connection on failure. TransportError includes timeout. Caller: one GET per web request; prior timeout 3 s. No nested retries. Only existing tests: immediate TransportError then success, max three immediate failures. The clock never advances and no timeout option is asserted. No other test guards elapsed-budget behavior. No actual traffic or worker-pool size is supplied. Review only the changed retry behavior; ignore unrelated style."
+    },
+    "expected": "request-changes",
+    "reason": "Runtime budget looks bounded, but removing the remaining-budget check or resetting the timeout leaves all tests green; missing guard is a concrete test finding."
+  },
+  {
+    "id": "case-08",
+    "files": {
+      "client.py": "def get(client):\n    try:\n        return client.get(timeout=3)\n    except VendorError as e:\n        if e.no_response:\n            return client.get(timeout=3)\n        raise\n",
+      "context.txt": "The old code made one call; the diff adds this retry. The transport implementation/version, meaning of timeout and no_response, caller entry points, and relevant tests are unavailable. No authorized risk disposition is supplied. The reviewer cannot fetch more context in this fixture."
+    },
+    "expected": "incomplete",
+    "reason": "Required semantics and caller evidence are missing; do not invent a timeout defect or approve from an empty findings list."
+  },
+  {
+    "id": "case-09",
+    "files": {
+      "change.diff": "-label = \"Delivey\"\n+label = \"Delivery\"\n",
+      "context.txt": "Only a display-label spelling correction. All runtime calls, timing, control flow, config, and concurrency are unchanged. No operational risk is declared. Existing label test updated. No unrelated defects."
+    },
+    "expected": "approve",
+    "reason": "Operational check is not applicable; do not demand callers, budgets, or capacity data."
+  },
+  {
+    "id": "case-10",
+    "files": {
+      "client.py": "def read_job(client):\n    for attempt in range(3):\n        try:\n            return client.get(timeout=2)\n        except NoResponse:\n            if attempt == 2:\n                return observable_fallback()\n",
+      "context.txt": "Prior: one 2 s attempt. Transport v2 has a whole-attempt timeout; NoResponse includes timeout and closes the connection. One job calls once; no nested retry or waits. Deployment: a separate dedicated pool of 8 workers, queue concurrency limited to 1, job deadline 30 s. Pinned receiving-base ops-policy.md signed by repo owner explicitly accepts up to 6 s and three downstream attempts for this isolated read job, including overload amplification, as a non-blocking trade-off. Tests fake full timeouts and verify three attempts, 6 s, fallback notification, and no leaked connection. A no-response backend slowdown still multiplies work. No other changed behavior."
+    },
+    "expected": "comment",
+    "reason": "Retain demonstrated accepted amplification visibly as non-blocking; verified policy changes disposition, not factual existence. No incomplete or invented blocking requirement."
+  }
+]

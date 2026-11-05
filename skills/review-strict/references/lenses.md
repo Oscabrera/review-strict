@@ -7,7 +7,9 @@ Each lens is dispatched as an independent `general-purpose` sub-agent (Phase 2).
 
 ## Finding contract (all lenses return this)
 
-Return a JSON array. Each finding:
+Return a JSON array by default. For triggered operational assessments, the
+canonical correctness/architecture/tests briefs use the conditional envelope
+in `operational-risk.md` instead. Each finding retains this schema:
 
 ```json
 {
