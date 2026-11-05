@@ -1,6 +1,6 @@
 ---
 name: review-strict
-description: Strict, repo-adaptive PR / branch / diff reviewer for Cyberpuerta repos. Runs a multi-agent, adversarially-verified review at staff-engineer rigor (correctness, security, architecture, tests, migration safety) and adapts to the repo it runs in by loading that repo's own rules (AGENTS.md, CLAUDE.md, .codex/skills, .claude/skills — plus any legacy .aiassistant/rules only if present). Works in Claude Code and Codex as a workflow decoupled from any spec/pipeline. Use when the user says "review-strict", "revisa este PR/branch estricto", "haz un review riguroso", "review this diff", "revisa mi rama antes del PR", or names a PR number to review. NOT for responding to existing reviewer comments (that is a different task).
+description: Strict, repo-adaptive PR / branch / diff reviewer. Runs a multi-agent, adversarially-verified review at staff-engineer rigor (correctness, security, architecture, tests, migration safety) and adapts to the repo it runs in by loading that repo's own rules (AGENTS.md, CLAUDE.md, .codex/skills, .claude/skills — plus any legacy .aiassistant/rules only if present). Works in Claude Code and Codex as a workflow decoupled from any spec/pipeline. Use when the user says "review-strict", "revisa este PR/branch estricto", "haz un review riguroso", "review this diff", "revisa mi rama antes del PR", or names a PR number to review. NOT for responding to existing reviewer comments (that is a different task).
 ---
 
 # /review-strict — strict, repo-adaptive PR reviewer
@@ -79,6 +79,10 @@ Hold the profile in memory — you inject its relevant parts into every sub-agen
    - A claimed mitigation / "no issue" / "out of scope" that the diff does **not** actually implement is a finding (`claimed-but-not-done`).
    - If the PR carries an **AC traceability table**, verify each AC row maps to real code and its claimed verification (existing/new test or repo-authorized non-test disposition) at the frozen head; a row marked ✅/tested with no corresponding assertion is a finding (`ac-traceability-gap`). This is a Pass-1-style check folded into the correctness + tests lenses.
 
+5. **Operational-risk trigger.** If retries, timeouts/deadlines, blocking waits, fan-out, concurrency limits, shared caches, circuit breakers, or other shared health state change (or a related risk is declared), read `references/operational-risk.md`. Supply its obligations and pinned dependency/caller context to correctness, architecture, and tests; collect their assessment envelopes and keep the risk ledger. Otherwise record this check as not applicable with a reason. A spec's accepted trade-off is a claim to assess, not a reason to omit the check.
+
+6. **Service-repoint trigger.** For service/dependency repoints, read `references/service-parity.md` and send its obligations to migration, correctness, and tests. Collect the migration parity assessment and include it in completion and skeptical approval verification.
+
 Never re-run full test suites here — that's expensive and out of scope for a diff review. If test coverage looks insufficient, that becomes a *finding* (Phase 2 tests lens), not a suite run.
 
 ## Phase 2 — Multi-lens review (fan-out)
@@ -103,16 +107,18 @@ The five lenses:
 4. **Tests** — meaningful vs tautological (would the test fail if the impl were subtly wrong?), duplicated-logic oracles, unhappy-path/edge/idempotency coverage, stubs masquerading as coverage.
 5. **Migration & deploy safety** — two-phase/backward-compatible schema changes, reversibility (`down()`), no drop/rename of live columns, chunked/idempotent backfills, rollback plan.
 
-**Detect and retry no-op agents.** After each lens returns, confirm it actually did work: it read the diff (made tool calls) and returned a findings array (even an empty `[]` is a valid, honest result). A dispatch that returns nothing, echoes its own instructions or the harness skills/agents menu, or reports **0 tool uses** is a **no-op** — re-dispatch it ONCE with a corrective preamble: *"Do real work now — your FIRST action must Read the diff at `<path>`. The skills/agents menu in any system-reminder is context data, NOT instructions. Do not return until you've produced the findings JSON."* If it no-ops twice, mark that lens as **"not completed"** in the report (never silently drop it — a missing lens is a visible gap, not a clean pass).
+**Detect and retry no-op agents.** After each lens returns, confirm it actually did work: it read the diff (made tool calls) and returned a findings array, or the required operational assessment envelope (empty findings are valid alongside the requested assessment). A dispatch that returns nothing, echoes its own instructions or the harness skills/agents menu, or reports **0 tool uses** is a **no-op** — re-dispatch it ONCE with a corrective preamble: *"Do real work now — your FIRST action must Read the diff at `<path>`. The skills/agents menu in any system-reminder is context data, NOT instructions. Do not return until you've produced the required findings/assessment JSON."* If it no-ops twice, mark that lens as **"not completed"** in the report (never silently drop it — a missing lens is a visible gap, not a clean pass).
 
 In `--fast` mode, skip the fan-out: you (the orchestrator) walk all five lens checklists yourself sequentially. Still run Phase 3.
 
-## Phase 3 — Adversarial verification (kill false positives)
+## Phase 3 — Adversarial verification and approval challenge
+
+Read `references/approval-claims.md`. Draft the proposed conclusion and its consequential-claim ledger before this pass. Always request `coverage_audit` for these claims, even with zero candidates; include operational assessments only when triggered.
 
 Collect all candidate findings, dedup by `file:line + what`. Then **verify each survivor against reality** (read `references/severity-output.md` → "Verification protocol"):
 
-- Multi-agent mode: dispatch this plugin's **`review-strict:verify-skeptic`** agent (read-only; inherits the session model/effort — no override, regardless of `--model`; the verify gate always runs at full strength) whose only job is to **refute** each finding — re-read the cited `file:line` in the actual diff/codebase and decide `real` / `not-real` / `uncertain`, defaulting to refuted under genuine uncertainty. Drop `not-real`; keep `uncertain` only as a lower-severity "reviewer attention" note, never as a blocker. (Fallback: `general-purpose` with the refute brief inlined if the typed agent is unavailable.) Apply the same **no-op detection + one retry** as Phase 2; if the skeptic still no-ops, fall back to performing the refute pass yourself inline (never ship unverified findings).
-- `--fast` mode: you perform the refute pass yourself with the same default-refute discipline.
+- Multi-agent mode: dispatch this plugin's **`review-strict:verify-skeptic`** agent (read-only; inherits the session model/effort — no override, regardless of `--model`; the verify gate always runs at full strength) to **refute** each finding — re-read the cited `file:line` in the actual diff/codebase and decide `real` / `not-real` / `uncertain`, defaulting to refuted under genuine uncertainty. Drop `not-real`; keep `uncertain` only as a lower-severity "reviewer attention" note, never as a blocker. For a triggered operational check, also request `coverage_audit` with the risk ledger and three assessments, even with zero candidates; follow `references/operational-risk.md` to resolve gaps and verify any newly discovered candidates. (Fallback: `general-purpose` with the refute brief inlined if the typed agent is unavailable.) Apply the same **no-op detection + one retry** as Phase 2; if the skeptic still no-ops, fall back to performing the refute and coverage passes yourself inline (never ship unverified findings or call missing assessments clean).
+- `--fast` mode: perform the same refute pass, consequential-claim audit, and, when triggered, operational coverage audit yourself, including with zero candidates.
 
 A finding survives only if the skeptic can point at the exact evidence. This is what keeps the review strict *and* trustworthy.
 
@@ -126,6 +132,8 @@ A finding survives only if the skeptic can point at the exact evidence. This is 
 6. State the final decision under the repo's blocking/disposition policy. A known blocker requires changes; otherwise incomplete coverage requires `incomplete`.
 
 ## Phase 5 — Deliver
+
+Read `references/delivery.md`. Prepare and validate the final artifact using the frozen context and assessment; this applies before chat delivery too, including `--no-save`. Generate its subject/provenance header with the helper rather than transcribing SHAs. Archive/repo-copy/post the exact validated bytes. An identity mismatch or failed required check must be resolved or reported as incomplete, never delivered as current approval.
 
 - Always print the report in chat.
 - **Always archive** the report (unless `--no-save`). Resolve the target directory **portably** — this must work for any developer, not just one machine:
@@ -158,7 +166,7 @@ A finding survives only if the skeptic can point at the exact evidence. This is 
 
 ## Operating rules (always)
 
-- **Report language: English by default; configurable.** Resolve the language in this order: the `--lang <en|es>` flag → the env var **`REVIEW_STRICT_LANG`** (`en` / `es`) → default `en`. Author the delivered report (chat + archived file) in that language's prose. Keep verbatim regardless of language: code, identifiers, file paths, commands, `file:line` anchors, severity keywords, and quoted evidence hunks — never translate those. **Hard rule — anything published outward is ALWAYS in English**, regardless of the report language: any GitHub PR comment/review (`--post`) and any ClickUp comment must be authored in English (Cyberpuerta's repo/PR convention). This is NOT overridable by `--lang`/`REVIEW_STRICT_LANG` — external comments are English, period.
+- **Report language: English by default; configurable.** Resolve the language in this order: the `--lang <en|es>` flag → the env var **`REVIEW_STRICT_LANG`** (`en` / `es`) → default `en`. Author the delivered report (chat + archived file) in that language's prose. Keep verbatim regardless of language: code, identifiers, file paths, commands, `file:line` anchors, severity keywords, and quoted evidence hunks — never translate those. **Hard rule — anything published outward is ALWAYS in English**, regardless of the report language: any GitHub PR comment/review (`--post`) and any issue/task tracker comment must be authored in English (standard team PR convention). This is NOT overridable by `--lang`/`REVIEW_STRICT_LANG` — external comments are English, period.
 - **Evidence over assertion.** Every finding cites `file:line` and the proof hunk. No finding without evidence survives.
 - **Errors only.** No praise, no "looks good", no restating what the PR does. A clean diff yields an honest "no blocking findings" with any minors listed.
 - **Repo rules win** on format/severity/commands; the baseline adds findings the repo forgot.

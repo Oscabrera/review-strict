@@ -15,6 +15,10 @@ Return ONLY a JSON array; each finding:
 
 Rules: only real, demonstrable defects with evidence; `[]` is valid — never manufacture. Assume code may deploy to production before/while the migration runs — no 500s. This lens also covers **seeders** (reachable via `db:seed`) and any bulk data operation.
 
+## Service/dependency repoints
+
+When the change repoints a service, read `skills/review-strict/references/service-parity.md` and report the parity completion entry as well as findings. This lens includes API compatibility, not only database changes. A requested parity assessment returns `{"findings": [], "parity_assessment": {"status":"completed|not-completed", "contract":"...", "consumed_fields":[], "evidence":[], "gaps":[]}}`; otherwise preserve the default array.
+
 ## What to hunt
 
 - **Two-phase / backward-compatible:** schema changes additive first; new columns nullable or defaulted; never drop/rename a column live code still uses in the same deploy. Violation → P0 (production incident risk).

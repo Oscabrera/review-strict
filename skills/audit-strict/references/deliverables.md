@@ -44,6 +44,12 @@ Two parts, both required:
 
 ## `analisis.json` schema (must be valid JSON)
 
+New bundles use **schema_version 1**: the fields below plus `sections` as described
+in `bundle-validation.md`. The executable schemas in `references/schemas/` are
+canonical. The unversioned historical shape is v0; it cannot claim v1 provenance.
+`stack` is a nonempty detected stack name, including CLI/plugin tooling; the three
+examples below are not an exclusive enum.
+
 ```json
 {
   "repo": "<name>", "stack": "backend|vue-nuxt|both", "generated_for": "<YYYY-MM-DD>",

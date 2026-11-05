@@ -1,6 +1,6 @@
 ---
 name: audit-strict
-description: Deep, repo-adaptive whole-repository architecture audit for Cyberpuerta repos. Runs a multi-agent, adversarially-verified analysis that reverse-engineers the system (component map, end-to-end flows, entity lifecycle/state machine, derived data model) and produces a technical quality audit plus a prioritized, phased roadmap — all cite-accurate (file:line) and survived a skeptic pass. Sibling to /review-strict (which reviews a diff/PR); this one analyzes the whole repo and is constructive (produces deliverables), not errors-only. Use when the user says "audit-strict", "audita este repo", "análisis arquitectónico", "analizador", "mapea este sistema", "genera la auditoría del repo", or wants the codex-style multi-file analysis. NOT for reviewing a diff/PR (that is /review-strict).
+description: Deep, repo-adaptive whole-repository architecture audit. Runs a multi-agent, adversarially-verified analysis that reverse-engineers the system (component map, end-to-end flows, entity lifecycle/state machine, derived data model) and produces a technical quality audit plus a prioritized, phased roadmap — all cite-accurate (file:line) and survived a skeptic pass. Sibling to /review-strict (which reviews a diff/PR); this one analyzes the whole repo and is constructive (produces deliverables), not errors-only. Use when the user says "audit-strict", "audita este repo", "análisis arquitectónico", "analizador", "mapea este sistema", "genera la auditoría del repo", or wants the codex-style multi-file analysis. NOT for reviewing a diff/PR (that is /review-strict).
 ---
 
 # /audit-strict — deep, repo-adaptive architecture audit
@@ -45,6 +45,8 @@ if [ -n "$BASE" ]; then OUT_DIR="$BASE/audit-strict/$REPO"; else OUT_DIR="$(git 
 printf 'out=%s lang=%s cart_model=%s\n' "$OUT_DIR" "$LANG_EFF" "$CART_MODEL"
 ```
 Then announce the resolved mode in one line, including stack, cartographer model, output location, and language (e.g. "Auditando cp-shops-csp — stack backend, cartógrafos: sonnet + verify: sesión, es, salida a `brain/audit-strict/cp-shops-csp/`").
+
+Read `../review-strict/references/review-integrity.md` for pinned evidence. Freeze the audit source (Git head or source snapshot digests) and record each section's verification/provenance; a partial refresh updates only the sections actually checked.
 
 ## Phase 0 — Repo Review Profile + stack detection
 
@@ -114,6 +116,7 @@ Read `references/deliverables.md` and assemble **all ten files** from the **surv
 
 ## Phase 5 — Deliver
 
+- For saved bundles read `references/bundle-validation.md`. Write the v1 source/completion ledger in `analisis.json` and its matching README table, then run the bundled validator before delivery. On errors correct the bundle or label delivery incomplete with diagnostics; preserve honest partial/N/A sections. With `--no-save`, inspect coverage inline and disclose that bundle validation was not run; do not write files merely to validate a chat-only summary.
 - Use the `$OUT_DIR` you already resolved (a base → `<base>/audit-strict/<repo>/`, else in-repo `<repo-root>/audit-strict/`). `mkdir -p` it.
 - **Write each file with a Bash quoted heredoc, NOT the Write/Edit tool** — so Mermaid/code `$`, backticks and `!` are literal and any cross-repo edit-guard is avoided when the override points outside the repo:
   ```bash

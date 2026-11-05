@@ -38,12 +38,18 @@ Every candidate finding must survive a **refute** pass before it reaches the rep
 - **Default is refuted.** The skeptic assumes the finding is wrong until the exact `file:line` evidence in the actual diff/codebase proves it.
 - For each finding, the skeptic re-reads the cited location and returns:
   - `real` — evidence confirms the defect exactly as stated → keep.
-  - `not-real` — the cited code doesn't do what the finding claims, the case is already handled elsewhere, the repo explicitly allows it, or the "caller" doesn't exist → **drop**.
+  - `not-real` — the cited code doesn't do what the finding claims, the case is already handled elsewhere, a verified convention exception leaves no demonstrated defect, or the "caller" doesn't exist → **drop**. Acceptance of a demonstrated behavior/resource risk affects disposition only after its authority and scope are verified; it is not mitigation or grounds to erase the finding.
   - `uncertain` — plausible but not provable from available context → keep only as a demoted "Reviewer attention" note (never a Blocker), naming what a human should check.
 - **Adjust severity down** if the impact is real but the reachability is limited (e.g. an internal-only path). Never inflate.
 - Multi-agent mode dispatches this as a dedicated skeptic sub-agent over the deduped finding list; `--fast` mode does it inline with the same discipline.
 
 The cost of a false Blocker is a wasted dev cycle chasing a non-bug; the cost of a missed real bug is an incident. Bias to P1+attention under real uncertainty, P0 only when you can name the exploit/failure.
+
+For triggered operational checks in `/review-strict`, also audit the risk ledger
+and correctness/architecture/tests assessments, including when there are no
+candidate findings. Use the conditional `coverage_audit` output in
+`agents/verify-skeptic.md`; missing required evidence prevents approval under
+`review-integrity.md`. Spec/audit dispatches keep their existing verdict array.
 
 ## Default output template (used when the repo supplies none)
 
