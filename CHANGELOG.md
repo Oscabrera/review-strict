@@ -1,11 +1,9 @@
 # Changelog
 
-## 1.4.2
+## 1.4.1
 - **Operational consequences before approval.** Retry, deadline, blocking-wait, fan-out, and concurrency changes now require version-specific failure semantics, effective time budgets/defaults, real caller/resource analysis, and mock-blind-spot assessment. A scoped reference assigns work to correctness, architecture, and tests; unrelated changes do not trigger it.
 - **Accepted risks remain visible.** Verified authority and scope can affect disposition, but acceptance or post-release monitoring cannot erase a demonstrated consequence or stand in for mitigation. Convention exceptions without a defect remain valid.
 - **Challenge clean conclusions.** The skeptic audits operational assessment coverage even with zero findings. Missing required evidence produces `incomplete`; additional candidates must be verified. Other spec/audit consumers keep the original verdict-array contract.
-
-## 1.4.1
 - **Decoupled rules and descriptions.** Removed internal and company-specific references across skill descriptions, baseline criteria, complexity budgets, and repository profiling, making the plugin fully generic and portable.
 
 ## 1.4.0
