@@ -45,7 +45,7 @@ The oracle for all of the below is **how THIS repo already builds things** (its 
 
 Concrete numbers beat "this is complex".
 
-**Most Cyberpuerta repos do NOT run PHPMD or PHP Insights** — do not count on CI evidence for these. Your measurement is primarily **your own count from the changed code**:
+**Most repos do NOT run PHPMD or PHP Insights in CI** — do not count on CI evidence for these. Your measurement is primarily **your own count from the changed code**:
 - **Thresholds:** repo config wins if present (`phpmd.xml`/`phpmd.xml.dist`, `phpinsights.php`, a PHPStan cognitive/cyclomatic rule, or numbers in `AGENTS.md`/`CLAUDE.md`) — cite the repo's number; else the baseline defaults below.
 - **Measurement (primary):** count it yourself from the diff / the changed file (Read it). Report **exact counts** for what is exactly countable — method length, class length, parameter count, public-method/method/field counts, nesting depth. For **cyclomatic complexity, count decision points** in the changed method (1 + each `if`/`elseif`/`case`/`for`/`foreach`/`while`/`catch`/`&&`/`||`/`?:`/`??`) and report it as an **estimate** ("CC ≈ N"), never as a tool-precise figure you don't have. Be honest about estimate vs exact.
 - **Evidence (bonus, not expected):** only if the repo actually runs PHPMD/PHP Insights/PHPStan-complexity in CI, read that output and cite its exact numbers instead of estimating.
@@ -54,12 +54,12 @@ Flag a finding when the **diff introduces or worsens** a method/class past a thr
 
 | Metric | Baseline default | Source / note |
 |---|---|---|
-| Cyclomatic complexity / method | ≥ 10 | PHPMD `reportLevel`. PHP Insights is stricter (5, per class). Cyberpuerta's own bar is CC > 10. |
+| Cyclomatic complexity / method | ≥ 10 | PHPMD `reportLevel`. PHP Insights is stricter (5, per class). Strict bar: CC > 10. |
 | NPath complexity / method | ≥ 200 | PHPMD — execution-path explosion |
-| Method length | > 100 lines | PHPMD. Cyberpuerta: > 50 |
-| Class length | > 1000 lines | PHPMD. Cyberpuerta: > 300 |
-| Parameter list | ≥ 10 params | PHPMD. Cyberpuerta: > 5 |
-| Public methods / class | ≥ 10 | PHPMD `TooManyPublicMethods`. Cyberpuerta: > 20 |
+| Method length | > 100 lines | PHPMD default (> 100). Strict bar: > 50 |
+| Class length | > 1000 lines | PHPMD default (> 1000). Strict bar: > 300 |
+| Parameter list | ≥ 10 params | PHPMD default (≥ 10). Strict bar: > 5 |
+| Public methods / class | ≥ 10 | PHPMD `TooManyPublicMethods` (≥ 10). Strict bar: > 20 |
 | Methods / class | ≥ 25 | PHPMD `TooManyMethods` |
 | Fields / class | ≥ 15 | PHPMD `TooManyFields` |
 | Weighted class complexity (Σ method CC) | ≥ 50 | PHPMD `ExcessiveClassComplexity` — the God-class signal |
