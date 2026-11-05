@@ -46,6 +46,8 @@ printf 'out=%s lang=%s cart_model=%s\n' "$OUT_DIR" "$LANG_EFF" "$CART_MODEL"
 ```
 Then announce the resolved mode in one line, including stack, cartographer model, output location, and language (e.g. "Auditando cp-shops-csp — stack backend, cartógrafos: sonnet + verify: sesión, es, salida a `brain/audit-strict/cp-shops-csp/`").
 
+Read `../review-strict/references/review-integrity.md` for pinned evidence. Freeze the audit source (Git head or source snapshot digests) and record each section's verification/provenance; a partial refresh updates only the sections actually checked.
+
 ## Phase 0 — Repo Review Profile + stack detection
 
 Read `../review-strict/references/repo-profile.md` and follow it to assemble the **Repo Review Profile** (this is REUSED verbatim from review-strict). It gives you: layering/architecture, red lines, declared observability/telemetry, in-progress migrations, testing conventions, base branch, docker exec prefix, severity vocab.
@@ -114,6 +116,7 @@ Read `references/deliverables.md` and assemble **all ten files** from the **surv
 
 ## Phase 5 — Deliver
 
+- For saved bundles read `references/bundle-validation.md`. Write the v1 source/completion ledger in `analisis.json` and its matching README table, then run the bundled validator before delivery. On errors correct the bundle or label delivery incomplete with diagnostics; preserve honest partial/N/A sections. With `--no-save`, inspect coverage inline and disclose that bundle validation was not run; do not write files merely to validate a chat-only summary.
 - Use the `$OUT_DIR` you already resolved (a base → `<base>/audit-strict/<repo>/`, else in-repo `<repo-root>/audit-strict/`). `mkdir -p` it.
 - **Write each file with a Bash quoted heredoc, NOT the Write/Edit tool** — so Mermaid/code `$`, backticks and `!` are literal and any cross-repo edit-guard is avoided when the override points outside the repo:
   ```bash

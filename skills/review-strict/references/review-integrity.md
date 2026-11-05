@@ -53,6 +53,10 @@ If Python is unavailable, run the equivalent Git commands explicitly: resolve
 both commits, compute their merge base, then diff that merge base against the
 head. A failed base resolution is an error, never “no diff” or “no spec”.
 
+Delivery enforcement for diff reviews: `delivery.md` binds the artifact to the
+resolved context and completion/claim ledger, including provenance and patch-only
+deletion checks. It does not replace the provider currency reread.
+
 ## Spec context
 
 For an explicit spec path, inventory the directory first. Read **every sibling

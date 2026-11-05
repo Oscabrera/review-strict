@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$ref": "audit-v0.json",
+  "title": "audit-strict bundle v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "sections"
+  ],
+  "properties": {
+    "schema_version": {
+      "enum": [
+        1
+      ]
+    },
+    "sections": {
+      "type": "object",
+      "required": [
+        "README.md",
+        "componentes.md",
+        "flujos.md",
+        "ciclo-vida.md",
+        "datos.md",
+        "auditoria.md",
+        "recomendaciones.md",
+        "pruebas.md",
+        "preguntas.md"
+      ],
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "status",
+          "source_id",
+          "verification",
+          "limitations"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "completed",
+              "not-completed",
+              "not-applicable"
+            ]
+          },
+          "source_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"
+          },
+          "verification": {
+            "type": "string",
+            "minLength": 1
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

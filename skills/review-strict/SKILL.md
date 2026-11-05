@@ -79,7 +79,9 @@ Hold the profile in memory — you inject its relevant parts into every sub-agen
    - A claimed mitigation / "no issue" / "out of scope" that the diff does **not** actually implement is a finding (`claimed-but-not-done`).
    - If the PR carries an **AC traceability table**, verify each AC row maps to real code and its claimed verification (existing/new test or repo-authorized non-test disposition) at the frozen head; a row marked ✅/tested with no corresponding assertion is a finding (`ac-traceability-gap`). This is a Pass-1-style check folded into the correctness + tests lenses.
 
-5. **Operational-risk trigger.** If retries, timeouts/deadlines, blocking waits, fan-out, or concurrency limits change (or a related risk is declared), read `references/operational-risk.md`. Supply its obligations and pinned dependency/caller context to correctness, architecture, and tests; collect their assessment envelopes and keep the risk ledger. Otherwise record this check as not applicable with a reason. A spec's accepted trade-off is a claim to assess, not a reason to omit the check.
+5. **Operational-risk trigger.** If retries, timeouts/deadlines, blocking waits, fan-out, concurrency limits, shared caches, circuit breakers, or other shared health state change (or a related risk is declared), read `references/operational-risk.md`. Supply its obligations and pinned dependency/caller context to correctness, architecture, and tests; collect their assessment envelopes and keep the risk ledger. Otherwise record this check as not applicable with a reason. A spec's accepted trade-off is a claim to assess, not a reason to omit the check.
+
+6. **Service-repoint trigger.** For service/dependency repoints, read `references/service-parity.md` and send its obligations to migration, correctness, and tests. Collect the migration parity assessment and include it in completion and skeptical approval verification.
 
 Never re-run full test suites here — that's expensive and out of scope for a diff review. If test coverage looks insufficient, that becomes a *finding* (Phase 2 tests lens), not a suite run.
 
@@ -111,10 +113,12 @@ In `--fast` mode, skip the fan-out: you (the orchestrator) walk all five lens ch
 
 ## Phase 3 — Adversarial verification and approval challenge
 
+Read `references/approval-claims.md`. Draft the proposed conclusion and its consequential-claim ledger before this pass. Always request `coverage_audit` for these claims, even with zero candidates; include operational assessments only when triggered.
+
 Collect all candidate findings, dedup by `file:line + what`. Then **verify each survivor against reality** (read `references/severity-output.md` → "Verification protocol"):
 
 - Multi-agent mode: dispatch this plugin's **`review-strict:verify-skeptic`** agent (read-only; inherits the session model/effort — no override, regardless of `--model`; the verify gate always runs at full strength) to **refute** each finding — re-read the cited `file:line` in the actual diff/codebase and decide `real` / `not-real` / `uncertain`, defaulting to refuted under genuine uncertainty. Drop `not-real`; keep `uncertain` only as a lower-severity "reviewer attention" note, never as a blocker. For a triggered operational check, also request `coverage_audit` with the risk ledger and three assessments, even with zero candidates; follow `references/operational-risk.md` to resolve gaps and verify any newly discovered candidates. (Fallback: `general-purpose` with the refute brief inlined if the typed agent is unavailable.) Apply the same **no-op detection + one retry** as Phase 2; if the skeptic still no-ops, fall back to performing the refute and coverage passes yourself inline (never ship unverified findings or call missing assessments clean).
-- `--fast` mode: perform the same refute pass and, when triggered, operational coverage audit yourself, including with zero candidates.
+- `--fast` mode: perform the same refute pass, consequential-claim audit, and, when triggered, operational coverage audit yourself, including with zero candidates.
 
 A finding survives only if the skeptic can point at the exact evidence. This is what keeps the review strict *and* trustworthy.
 
@@ -128,6 +132,8 @@ A finding survives only if the skeptic can point at the exact evidence. This is 
 6. State the final decision under the repo's blocking/disposition policy. A known blocker requires changes; otherwise incomplete coverage requires `incomplete`.
 
 ## Phase 5 — Deliver
+
+Read `references/delivery.md`. Prepare and validate the final artifact using the frozen context and assessment; this applies before chat delivery too, including `--no-save`. Generate its subject/provenance header with the helper rather than transcribing SHAs. Archive/repo-copy/post the exact validated bytes. An identity mismatch or failed required check must be resolved or reported as incomplete, never delivered as current approval.
 
 - Always print the report in chat.
 - **Always archive** the report (unless `--no-save`). Resolve the target directory **portably** — this must work for any developer, not just one machine:

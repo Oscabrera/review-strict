@@ -1,0 +1,64 @@
+{
+  "cases": [
+    {
+      "id": "01",
+      "request": "Audit this proposed approval: \"The SOURCE flag defaults to legacy and failures fall back to legacy.\" The required contract only repoints requests; no fallback is promised. Judge reviewer claims separately from source defects.",
+      "source": "import os\ndef request(fetch):\n    return fetch(\"service-b/item\")\n",
+      "expected": "correct unsupported approval; no invented source defect"
+    },
+    {
+      "id": "02",
+      "request": "Audit this approval: \"Unknown ids return 422.\" The repo explicitly allows its request adapter to override framework defaults. Required contract is unchanged.",
+      "source": "def validate(id):\n    return 404 if id is None else 200\ndef test_unknown():\n    assert validate(None) == 404\n",
+      "expected": "correct status claim to 404; no invented code defect"
+    },
+    {
+      "id": "03",
+      "request": "Audit this approval: \"Unknown ids return 404; transport errors propagate without fallback.\" These statements are optional factual explanation.",
+      "source": "def validate(id):\n    return 404 if id is None else 200\ndef request(fetch):\n    return fetch(\"service-b/item\")\n",
+      "expected": "claims verified; clean control"
+    },
+    {
+      "id": "04",
+      "request": "Review changed preview caching. Required contract: show currently authoritative price; stale fallback after recovery must not be cached as authoritative. Caller first receives degraded price, then dependency recovers with same basket inputs. TTL=600 seconds, time is unchanged between the two reads.",
+      "source": "cache={}\ndef preview(key, now, price):\n    if key in cache and now-cache[key][0]<600:\n        return cache[key][1]\n    result=price()\n    cache[key]=(now,result)\n    return result\n",
+      "expected": "show fallback persists after recovery for remaining TTL; justified finding"
+    },
+    {
+      "id": "05",
+      "request": "Review breaker: contract requires isolation between endpoint A and B. Key is host. Threshold 5 failures in 60 seconds, opens 30 seconds. Successful closed-state calls deliberately do not reset the window. Sequence: A failures at 0,10,20,30,40, interleaved successes. B is called at 41 on same host.",
+      "source": "failures={}\nopened={}\ndef fail(host,t):\n    failures[host]=[v for v in failures.get(host,[]) if t-v<=60]+[t]\n    if len(failures[host])>=5: opened[host]=t+30\ndef success(host,t): pass\ndef blocked(host,t): return t<opened.get(host,0)\n",
+      "expected": "identify cross-endpoint failure coupling; no invented traffic/outage"
+    },
+    {
+      "id": "06",
+      "request": "Review deliberately host-wide breaker. Same timing as 05, but authorized contract explicitly accepts sharing between endpoints A and B; successes do not reset the failure window. Dependency open interval is bounded at 30 seconds. Keep the demonstrated trade-off visible, nonblocking. Do not impose resource-scoped design.",
+      "source": "failures={}\nopened={}\ndef fail(host,t):\n    failures[host]=[v for v in failures.get(host,[]) if t-v<=60]+[t]\n    if len(failures[host])>=5: opened[host]=t+30\ndef success(host,t): pass\ndef blocked(host,t): return t<opened.get(host,0)\n",
+      "expected": "bounded accepted coupling retained nonblocking, no universal isolation mandate"
+    },
+    {
+      "id": "07",
+      "request": "Client repoints A to B and promises behavioral parity. Existing route test calls fetch returning {} and asserts only /b path. Supplied responses use identical inputs and data snapshot. The caller consumes match as a decision. Evaluate semantic parity.",
+      "source": "old={\"match\":True}\nnew={\"match\":False}\ndef consumed(response): return response[\"match\"]\n",
+      "expected": "reproduced consumed-field mismatch, not merely a route gap"
+    },
+    {
+      "id": "08",
+      "request": "Client repoints A to B and promises parity. Existing independent contract fixture covers the consumed match field with equivalent inputs/data snapshot; route test also exists. No new test is needed if existing evidence suffices.",
+      "source": "old={\"match\":True}\nnew={\"match\":True}\ndef consumed(response): return response[\"match\"]\n",
+      "expected": "equivalent-response clean control"
+    },
+    {
+      "id": "09",
+      "request": "Client repoints A to B. Authorized contract intentionally changes field semantics: the consumer now negates the new result. Inputs and data snapshots match; compatibility at the caller boundary is required.",
+      "source": "old={\"match\":True}\nnew={\"match\":False}\ndef old_consumer(r): return r[\"match\"]\ndef new_consumer(r): return not r[\"match\"]\n",
+      "expected": "caller contract preserved despite intentionally changed response; no false parity defect"
+    },
+    {
+      "id": "10",
+      "request": "Client repoints A to B. Behavioral parity is required before approval. Only path/options mocks returning {} are supplied. No source responses, independent contract fixtures or owned rollout verification are available. Do not infer a reproduced mismatch.",
+      "source": "def request(fetch): return fetch(\"/b\")\n",
+      "expected": "missing required proof means incomplete, no invented mismatch"
+    }
+  ]
+}

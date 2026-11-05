@@ -1,7 +1,8 @@
-# Operational consequences of retries, deadlines, and concurrency
+# Operational consequences of retries, deadlines, concurrency and shared state
 
 Apply this check when the diff changes retries, timeouts/deadlines, blocking
-waits, fan-out, or concurrency limits, or declares a related operational risk.
+waits, fan-out, concurrency limits, shared caches, circuit breakers, or other
+shared health state, or declares a related operational risk.
 Otherwise record `not-applicable` with the reason in the completion ledger;
 do not demand an operational exercise for unrelated changes.
 
@@ -28,12 +29,23 @@ lockfile or vendor source needed for this check is relevant context, not noise.
   source of each input and distinguish calculated bounds from measured latency.
   Describe overload feedback when the dependency slows down. Do not assert a
   pool will exhaust or invent traffic/pool sizes absent deployment evidence.
+- **Shared state (correctness + architecture):** trace cache/breaker keys to their
+  actual sharing scope (resource, user, tenant, endpoint, host). Establish TTL,
+  invalidation, degraded-result provenance, thresholds and half-open recovery.
+  Follow a failure followed by dependency recovery with unchanged business inputs:
+  does a cached fallback remain, and for how long? Interleave successes and
+  failures for resource A; determine whether B or another endpoint shares an
+  open circuit. Check the actual reset policy, not a presumed conventional one.
+  A host-wide breaker or bounded fallback cache can be deliberate: retain proven
+  consequences and verify acceptance authority/scope before deciding disposition.
 - **Tests:** identify behavior hidden by mocks: elapsed time, blocking,
   cancellation, or resource release. For a changed retry budget, seek coverage
   of an attempt consuming the whole budget and a fast failure receiving only
   the remainder after waits. Existing guards or a deterministic fake clock can
   suffice; real sleeps, a live outage, and a new test per case are not required.
-  Name a concrete broken budget/guard that would leave the tests green, if any.
+  For shared state, exercise degraded → recovered and mixed success/failure
+  sequences across callers sharing a key, with a fake clock/store as needed.
+  Name a concrete broken budget/guard/state transition that would leave tests green, if any.
 
 The orchestrator supplies these obligations to the three owners, in both fan-out
 and `--fast` modes. When requested, each owner returns this envelope instead of

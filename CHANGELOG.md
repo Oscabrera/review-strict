@@ -1,9 +1,12 @@
 # Changelog
 
 ## 1.4.1
+- **Evidence-bound delivery.** The existing skeptic now checks consequential approval claims even with no findings. A read-only delivery helper generates source/provenance headers, validates completion and claims, checks patch deletion assertions, and binds exact artifact bytes to the current Git context.
+- **State recovery and service parity.** Operational checks include shared cache/breaker scope and recovery. Service repoints require caller-visible parity evidence, with route-only mocks and authorized behavior changes assessed separately.
+- **Executable spec/audit integrity.** Spec review tracks load-bearing verification evidence and includes blind false-green evaluation cases. Audit bundles gain versioned JSON schemas, portable-link validation and per-section completion/source reconciliation, preserving explicit partial output and historical formats.
 - **Operational consequences before approval.** Retry, deadline, blocking-wait, fan-out, and concurrency changes now require version-specific failure semantics, effective time budgets/defaults, real caller/resource analysis, and mock-blind-spot assessment. A scoped reference assigns work to correctness, architecture, and tests; unrelated changes do not trigger it.
 - **Accepted risks remain visible.** Verified authority and scope can affect disposition, but acceptance or post-release monitoring cannot erase a demonstrated consequence or stand in for mitigation. Convention exceptions without a defect remain valid.
-- **Challenge clean conclusions.** The skeptic audits operational assessment coverage even with zero findings. Missing required evidence produces `incomplete`; additional candidates must be verified. Other spec/audit consumers keep the original verdict-array contract.
+- **Challenge clean conclusions.** The skeptic audits operational assessment coverage even with zero findings. Missing required evidence produces `incomplete`; additional candidates must be verified. Dispatches without an explicit coverage-audit flag keep the original verdict-array contract.
 - **Decoupled rules and descriptions.** Removed internal and company-specific references across skill descriptions, baseline criteria, complexity budgets, and repository profiling, making the plugin fully generic and portable.
 
 ## 1.4.0
