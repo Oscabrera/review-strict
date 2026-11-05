@@ -8,13 +8,13 @@ The profile is what makes `/review-strict` repo-adaptive. Build it in Phase 0, b
 - Stack: read `composer.json` (Laravel/PHP? `require.php`, `laravel/framework`), `package.json` (Vue/React/TS?), presence of `phpunit.xml`, `pint.json`, `phpstan.neon`.
 - **Complexity/quality config:** look for `phpmd.xml`(`.dist`), `phpinsights.php`, and any PHPStan cognitive/cyclomatic-complexity rules. If present, extract the repo's configured thresholds (cyclomatic complexity, method/class length, parameter/method/field counts, coupling) — these become the architecture lens's `complexity_thresholds` and **override** the baseline defaults. Most repos do NOT run PHPMD/PHP Insights — if one does, note it so Phase 1 can read the evidence; otherwise the architecture lens estimates complexity from the diff (it does not depend on the tools being installed).
 - Base branch: `--base` flag → else a configured base in `AGENTS.md`/CLAUDE.md workflow block (`git.base_branch`) → else `development` if it exists on origin → else `main`.
-- Docker: does the repo have a `docker-commands` skill or `docker-compose.yaml`? Capture the exec prefix (e.g. `docker compose exec -T app`) — most CP repos run pint/phpstan/pest **inside** the container.
+- Docker: does the repo have a `docker-commands` skill or `docker-compose.yaml`? Capture the exec prefix (e.g. `docker compose exec -T app`) — containerized repos often run pint/phpstan/pest **inside** the container.
 
 ## Step 2 — Load the rule sources
 
-The durable sources below are present in every Cyberpuerta repo and are the PRIMARY input. Read them first; the skill's bundled baseline (Step 3 of the skill) always applies on top.
+The durable sources below represent the repo's declared conventions and are the PRIMARY input. Read them first; the skill's bundled baseline (Step 3 of the skill) always applies on top.
 
-1. **`AGENTS.md` / `CLAUDE.md`** (repo root) — the primary review contract in every CP repo. Extract:
+1. **`AGENTS.md` / `CLAUDE.md`** (repo root) — the primary review contract in repos with AI assistance rules. Extract:
    - **Red lines** ("do not cross") and the **"Forbidden patterns"** list — these are hard P0/Blocker triggers.
    - Layering/architecture description (Controller → Service → Repository, DTOs, Contracts) — the placement oracle for the architecture lens.
    - **Code standards** (strict types, PER/PSR-12, no fat controllers, FormRequest validation, N+1, `DB::transaction`, etc.) and **testing** rules (runner, e.g. Pest not `phpunit`; `RefreshDatabase` vs a persistent DB — **use what the repo says**).
