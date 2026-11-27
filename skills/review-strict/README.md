@@ -37,7 +37,7 @@ Reviews a diff at staff-engineer rigor and **reports errors only** (no "looks go
 ## How it works (6 phases)
 
 0. **Profile the repo** — `AGENTS.md` + `CLAUDE.md` + `.claude/skills/*` (and `.aiassistant/rules/*` only if present). Local-wins precedence.
-1. **Diff + toolchain** — pulls the diff, pins base/head, keeps governing specs, and excludes irrelevant artifacts, and captures Pint/PHPStan best-effort (uses evidence/CI if present; otherwise skips — never blocks).
+1. **Diff + toolchain** — pulls the diff, pins base/head, keeps governing specs as the yardstick (their wording is not reviewed), excludes irrelevant artifacts, and captures Pint/PHPStan best-effort (uses evidence/CI if present; otherwise skips — never blocks).
 2. **Fan-out of 5 lenses** (independent agents; hybrid by default — correctness/#4, security, architecture on the session model, tests + migration on Sonnet; `REVIEW_STRICT_MODEL`/`--model` force a uniform model). Detects no-op agents and retries.
 3. **Adversarial verification** — a skeptic pass that kills false positives (default-refute; always on the session model).
 4. **Synthesis** — severities in the repo's vocabulary (Blocker/Major/Minor), most-severe first.

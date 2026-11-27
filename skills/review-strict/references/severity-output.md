@@ -96,6 +96,7 @@ Spanish header equivalents when the language is `es`: `# Revisión`, `Decisión`
 Rules for the report:
 - **Errors only.** No praise, no summary of what the PR does. If there are zero blocking findings, say so plainly and list any Major/Minor.
 - **Every finding cites `file:line` + evidence.** Drop anything that can't.
+- **Findings are about the change, not its paperwork.** Do not report the wording, staleness, dangling cross-references or stale pointers of spec files or the PR body. Keep only what misleads the approver: a verification claimed as done that was not run, missing evidence for a declared verification, or a statement about the code that the pinned head contradicts. The repo's own rules can widen this.
 - **Final decision is honest:** any surviving Blocker → `request-changes`.
 - **No approval from missing work:** an incomplete diff review is `incomplete` (`COMMENT` if posted). Optional build checks may be not run; missing applicable lenses or required canonical obligations may not be called clean.
 - Keep it scannable: conclusion (decision) at the top, detail below.

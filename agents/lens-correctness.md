@@ -30,6 +30,7 @@ If the prompt carries the PR body's self-declared risks / "out of scope" / "no i
 - **AC traceability:** for each AC, verify real implementation and the claimed verification at the pinned head: existing/new test or a repo-authorized non-test disposition. A claimed test that the runner never collects is an `ac-traceability-gap`. A reused test need not appear in the diff to count.
 - **Claimed-but-not-done:** a claimed mitigation / completed AC that the diff does not actually implement (or that a code comment contradicts) is a `claimed-but-not-done` finding.
 - A real declared risk is still a finding — the author naming it does not resolve it.
+- **Documents are the yardstick, not the subject.** Do not report the wording, staleness, dangling cross-references, line-number drift or table formatting of spec files or the PR body. Report a finding anchored on them only when it misleads the approver: a verification claimed as done that was not run, missing evidence for a verification the PR declares, or a statement about the code's behavior that the pinned head contradicts. A traceability row whose claim holds but whose pointer is stale is not a finding. The repo's own rules can widen this.
 
 For changed shared caches/breakers, apply the shared-state ownership and recovery
 checks in `skills/review-strict/references/operational-risk.md`.
