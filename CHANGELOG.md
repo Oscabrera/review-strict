@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.4.2
+- **Spec and PR-body documents are the yardstick, not the subject.** `/review-strict` still reads governing spec, design, contract and decision documents to learn what a change promised and to check the code against it, but no longer reports findings about their wording, staleness, dangling cross-references, line-number drift or traceability formatting. Three kinds of finding anchored on those documents remain: a verification claimed as done that was not run, missing evidence for a verification the PR declares, and a statement about the code's behavior that the pinned head contradicts. A repository's own rules can widen the scope. Motivation: on a batch of 21 PR reviews, 11 findings in 9 reviews were document-only minors that changed nothing shipped and landed on files the pipeline generates.
+
 ## 1.4.1
 - **Evidence-bound delivery.** The existing skeptic now checks consequential approval claims even with no findings. A read-only delivery helper generates source/provenance headers, validates completion and claims, checks patch deletion assertions, and binds exact artifact bytes to the current Git context.
 - **State recovery and service parity.** Operational checks include shared cache/breaker scope and recovery. Service repoints require caller-visible parity evidence, with route-only mocks and authorized behavior changes assessed separately.
